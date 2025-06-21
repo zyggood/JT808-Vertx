@@ -11,6 +11,7 @@ desktop.ini    # Windows 文件夹配置
 venv/
 .vscode/       # VS Code 配置（团队共享配置应提交，但个人设置建议忽略）
 .idea/         # JetBrains IDE 配置
+.idea/*
 *.iml
 *.log          # 日志文件
 
@@ -27,6 +28,7 @@ __pycache__/   # Python 缓存目录
 ### 包管理 ###
 *.egg-info/    # Python 包信息
 /target/       # Maven 编译输出
+*/target
 /vendor/       # Go 依赖目录
 
 ### 测试相关 ###
