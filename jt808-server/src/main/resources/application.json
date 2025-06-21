@@ -1,0 +1,35 @@
+{
+  "tcp": {
+    "port": 7611,
+    "host": "0.0.0.0",
+    "keepAlive": true,
+    "noDelay": true,
+    "reuseAddress": true,
+    "acceptBacklog": 1024
+  },
+  "udp": {
+    "port": 7612,
+    "host": "0.0.0.0"
+  },
+  "http": {
+    "port": 8080,
+    "host": "0.0.0.0"
+  },
+  "database": {
+    "type": "h2",
+    "url": "jdbc:h2:./data/jt808;AUTO_SERVER=TRUE;DB_CLOSE_DELAY=-1",
+    "driver": "org.h2.Driver",
+    "username": "sa",
+    "password": "",
+    "maxPoolSize": 20,
+    "minPoolSize": 5
+  },
+  "session": {
+    "timeoutMinutes": 5,
+    "cleanupIntervalMinutes": 1
+  },
+  "logging": {
+    "level": "INFO",
+    "pattern": "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  }
+}
