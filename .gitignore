@@ -1,0 +1,66 @@
+### 通用规则 ###
+*~             # 编辑器临时文件
+*.swp          # Vim 交换文件
+.DS_Store      # macOS 属性文件
+Thumbs.db      # Windows 缩略图缓存
+desktop.ini    # Windows 文件夹配置
+
+### 开发环境 ###
+.env           # 环境变量文件
+.venv/         # Python 虚拟环境
+venv/
+.vscode/       # VS Code 配置（团队共享配置应提交，但个人设置建议忽略）
+.idea/         # JetBrains IDE 配置
+*.iml
+*.log          # 日志文件
+
+### 编译产物 ###
+build/         # 构建目录
+dist/          # 分发目录
+*.exe          # 可执行文件
+*.pyc          # Python 字节码
+__pycache__/   # Python 缓存目录
+/node_modules/  # Node.js 依赖
+/bin/          # 编译后的二进制目录
+/out/          # 输出目录（如 Java、TypeScript）
+
+### 包管理 ###
+*.egg-info/    # Python 包信息
+/target/       # Maven 编译输出
+/vendor/       # Go 依赖目录
+
+### 测试相关 ###
+coverage/      # 测试覆盖率报告
+junit.xml      # 单元测试报告
+
+### 文档 ###
+_site/         # 静态站点生成器输出（如 Jekyll）
+*.chm          # 编译的 HTML 帮助文件
+
+### 系统文件 ###
+ehthumbs.db
+[Tt]humbs.db
+
+### 示例：按需取消注释 ###
+## C/C++
+# *.o
+# *.a
+
+## Java
+# *.class
+# *.jar
+
+## Ruby
+# /.bundle
+# /vendor/bundle
+
+## Go
+# /debug/
+
+## Rust
+# /target/
+
+## Android
+# *.apk
+# *.ap_
+# /gen/
