@@ -103,12 +103,45 @@ public final class JT808Constants {
         // 行驶记录参数下传
         public static final int DRIVING_RECORD_PARAMS_DOWNLOAD = 0x8702;
         // 电子运单上报
-
+        public static final int ELECTRONIC_TRANSPORTATION_NOTICE = 0x0701;
         // 上报驾驶员身份信息请求
-
+        public static final int UPLOAD_DRIVER_IDENTITY_INFO_REQUEST = 0x8702;
         // 驾驶员身份信息采集上报
-
+        public static final int DRIVER_IDENTITY_INFO_COLLECTION_UPLOAD = 0x0702;
         // 定位数据批量上传
+        public static final int LOCATION_DATA_BATCH_UPLOAD = 0x8704;
+        // CAN总线数据上传
+        public static final int CAN_BUS_DATA_UPLOAD = 0x8705;
+        // 多媒体事件信息上传
+        public static final int MULTIMEDIA_EVENT_INFO_UPLOAD = 0x0800;
+        // 多媒体数据上传
+        public static final int MULTIMEDIA_DATA_UPLOAD = 0x0801;
+        // 多媒体数据上传应答
+        public static final int MULTIMEDIA_DATA_UPLOAD_RESPONSE = 0x8800;
+        // 摄像头立即拍摄命令
+        public static final int CAMERA_IMMEDIATE_SHOOTING = 0x8801;
+        // 摄像头立即拍摄命令应答
+        public static final int CAMERA_IMMEDIATE_SHOOTING_RESPONSE = 0x0805;
+        // 存储多媒体数据检索
+        public static final int MULTIMEDIA_DATA_RETRIEVAL = 0x8802;
+        // 存储多媒体数据检索应答
+        public static final int MULTIMEDIA_DATA_RETRIEVAL_RESPONSE = 0x0802;
+        // 存储多媒体数据上传命令
+        public static final int MULTIMEDIA_DATA_UPLOAD_COMMAND = 0x8803;
+        // 录音开始命令
+        public static final int AUDIO_RECORDING_START = 0x8804;
+        // 单条存储多媒体数据检索上传命令
+        public static final int SINGLE_MULTIMEDIA_DATA_RETRIEVAL_UPLOAD = 0x8805;
+        // 数据下行透传
+        public static final int DATA_DOWNLINK_TRANSMISSION = 0x8900;
+        // 数据上行透传
+        public static final int DATA_UPLINK_TRANSMISSION = 0x0900;
+        // 数据压缩上报
+        public static final int DATA_COMPRESSION_REPORT = 0x0901;
+        // 平台RSA公钥
+        public static final int PLATFORM_RSA_PUBLIC_KEY = 0x8A00;
+        // 终端RSA公钥
+        public static final int TERMINAL_RSA_PUBLIC_KEY = 0x0A00;
 
     }
     
