@@ -154,9 +154,9 @@ public class JT808Decoder {
      * @return true表示2019版本
      */
     private boolean isVersion2019(int messageProperty) {
-        // 2019版本在消息体属性中有特定标识
-        // 这里简化处理，实际需要根据具体协议规范判断
-        return false;
+        // 2019版本在消息体属性的第14位（从0开始计数）有版本标识位
+        // 当第14位为1时，表示2019版本协议
+        return (messageProperty & 0x4000) != 0;
     }
     
     /**

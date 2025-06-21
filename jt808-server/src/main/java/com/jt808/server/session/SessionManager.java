@@ -68,9 +68,18 @@ public class SessionManager {
     public void bindPhoneToSession(String sessionId, String phoneNumber) {
         Session session = sessions.get(sessionId);
         if (session != null) {
-            // 移除旧的绑定
+            // 移除当前会话的旧手机号绑定
             if (session.getPhoneNumber() != null) {
                 phoneToSessionMap.remove(session.getPhoneNumber());
+            }
+            
+            // 检查该手机号是否已绑定到其他会话，如果是则清除旧会话的手机号
+            String oldSessionId = phoneToSessionMap.get(phoneNumber);
+            if (oldSessionId != null && !oldSessionId.equals(sessionId)) {
+                Session oldSession = sessions.get(oldSessionId);
+                if (oldSession != null) {
+                    oldSession.setPhoneNumber(null);
+                }
             }
             
             // 建立新的绑定
