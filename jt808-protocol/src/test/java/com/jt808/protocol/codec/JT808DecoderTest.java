@@ -1,13 +1,12 @@
 package com.jt808.protocol.codec;
 
-import com.jt808.common.JT808Constants;
 import com.jt808.common.exception.ProtocolException;
 import com.jt808.common.util.ByteUtils;
-import com.jt808.protocol.message.JT808Header;
 import com.jt808.protocol.message.JT808Message;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -285,5 +284,37 @@ class JT808DecoderTest {
         buffer.appendByte((byte) 0x7E);
         
         return buffer;
+    }
+
+    @Test
+    void testDecodeComplexMessage() throws ProtocolException {
+        String hex = "020000d40123456789017fff000004000000080006eeb6ad02633df7013800030063200707192359642f000000400101020a0a02010a1e00640001b2070003640e200707192359000100000061646173200827111111010101652f000000410202020a0000000a1e00c8000516150006c81c20070719235900020000000064736d200827111111020202662900000042031e012c00087a23000a2c2a200707192359000300000074706d732008271111110303030067290000004304041e0190000bde31000d90382007071923590004000000006273642008271111110404049d";
+
+        // 将十六进制字符串转换为字节数组
+        byte[] bytes = ByteUtils.hexToBytes(hex);
+
+        // 创建包含起始和结束标识位的完整消息
+        Buffer buffer = Buffer.buffer();
+        buffer.appendByte((byte) 0x7E); // 起始标识位
+        buffer.appendBytes(bytes);
+        buffer.appendByte((byte) 0x7E); // 结束标识位
+
+        // 解码消息
+        JT808Message message = decoder.decode(buffer);
+
+        // 验证解码结果
+        assertNotNull(message, "解码后的消息不应为null");
+        assertNotNull(message.getHeader(), "消息头不应为null");
+
+        // 验证消息ID (0x0200 = 位置信息汇报)
+        assertEquals(0x0200, message.getMessageId(), "消息ID应为0x0200");
+
+        // 验证终端手机号
+        assertEquals("12345678901", message.getHeader().getPhoneNumber(), "终端手机号应为123456789017");
+
+        System.out.println("消息解码成功:");
+        System.out.println("消息ID: 0x" + Integer.toHexString(message.getMessageId()).toUpperCase());
+        System.out.println("终端手机号: " + message.getHeader().getPhoneNumber());
+        System.out.println("消息体长度: " + message.getHeader().getBodyLength());
     }
 }
