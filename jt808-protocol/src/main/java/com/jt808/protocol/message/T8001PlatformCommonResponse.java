@@ -130,6 +130,28 @@ public class T8001PlatformCommonResponse extends JT808Message {
         this.result = result;
     }
     
+    /**
+     * 创建成功应答
+     */
+    public static T8001PlatformCommonResponse createSuccessResponse(int serialNumber, int messageId) {
+        T8001PlatformCommonResponse response = new T8001PlatformCommonResponse();
+        response.setResponseSerialNumber(serialNumber);
+        response.setResponseMessageId(messageId);
+        response.setResult(RESULT_SUCCESS);
+        return response;
+    }
+    
+    /**
+     * 创建失败应答
+     */
+    public static T8001PlatformCommonResponse createFailureResponse(int serialNumber, int messageId, byte result) {
+        T8001PlatformCommonResponse response = new T8001PlatformCommonResponse();
+        response.setResponseSerialNumber(serialNumber);
+        response.setResponseMessageId(messageId);
+        response.setResult(result);
+        return response;
+    }
+    
     @Override
     public String toString() {
         return "T8001PlatformCommonResponse{" +

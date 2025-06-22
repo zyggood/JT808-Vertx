@@ -15,6 +15,7 @@ venv/
 *.iml
 *.log          # 日志文件
 logs
+.xcodemap/
 
 ### 编译产物 ###
 build/         # 构建目录

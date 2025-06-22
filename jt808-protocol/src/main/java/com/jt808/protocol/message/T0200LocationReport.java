@@ -266,6 +266,69 @@ public class T0200LocationReport extends JT808Message {
         this.additionalInfo = additionalInfo;
     }
     
+    /**
+     * 检查是否有紧急报警
+     */
+    public boolean hasEmergencyAlarm() {
+        return (alarmFlag & 0x00000001) != 0;
+    }
+    
+    /**
+     * 检查是否有超速报警
+     */
+    public boolean hasSpeedingAlarm() {
+        return (alarmFlag & 0x00000002) != 0;
+    }
+    
+    /**
+     * 检查是否有疲劳驾驶报警
+     */
+    public boolean hasFatigueAlarm() {
+        return (alarmFlag & 0x00000004) != 0;
+    }
+    
+    /**
+     * 检查是否有危险预警
+     */
+    public boolean hasDangerWarning() {
+        return (alarmFlag & 0x00000008) != 0;
+    }
+    
+    /**
+     * 检查是否有GNSS模块发生故障
+     */
+    public boolean hasGNSSFault() {
+        return (alarmFlag & 0x00000010) != 0;
+    }
+    
+    /**
+     * 检查是否有GNSS天线未接或被剪断
+     */
+    public boolean hasGNSSAntennaFault() {
+        return (alarmFlag & 0x00000020) != 0;
+    }
+    
+    /**
+     * 检查是否有GNSS天线短路
+     */
+    public boolean hasGNSSAntennaShort() {
+        return (alarmFlag & 0x00000040) != 0;
+    }
+    
+    /**
+     * 检查是否有终端主电源欠压
+     */
+    public boolean hasMainPowerUndervoltage() {
+        return (alarmFlag & 0x00000080) != 0;
+    }
+    
+    /**
+     * 检查是否有终端主电源掉电
+     */
+    public boolean hasMainPowerFailure() {
+        return (alarmFlag & 0x00000100) != 0;
+    }
+    
     @Override
     public String toString() {
         return "T0200LocationReport{" +

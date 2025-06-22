@@ -26,7 +26,13 @@ class JT808DecoderTest {
         // 构造一个有效的JT808消息
         Buffer messageBuffer = createValidMessage();
         
-        JT808Message message = decoder.decode(messageBuffer);
+        JT808Message message;
+        try {
+            message = decoder.decode(messageBuffer);
+        } catch (Exception e) {
+            fail("解码失败: " + e.getMessage());
+            return;
+        }
         
         assertNotNull(message);
         assertNotNull(message.getHeader());
@@ -72,7 +78,13 @@ class JT808DecoderTest {
         // 构造包含转义字符的消息
         Buffer messageBuffer = createMessageWithEscape();
         
-        JT808Message message = decoder.decode(messageBuffer);
+        JT808Message message;
+        try {
+            message = decoder.decode(messageBuffer);
+        } catch (Exception e) {
+            fail("解码失败: " + e.getMessage());
+            return;
+        }
         
         assertNotNull(message);
         assertNotNull(message.getHeader());
@@ -97,7 +109,13 @@ class JT808DecoderTest {
         // 构造2019版本的消息（包含协议版本号）
         Buffer messageBuffer = createVersion2019Message();
         
-        JT808Message message = decoder.decode(messageBuffer);
+        JT808Message message;
+        try {
+            message = decoder.decode(messageBuffer);
+        } catch (Exception e) {
+            fail("解码失败: " + e.getMessage());
+            return;
+        }
         
         assertNotNull(message);
         assertNotNull(message.getHeader());
@@ -109,7 +127,13 @@ class JT808DecoderTest {
         // 构造分包消息
         Buffer messageBuffer = createSubpackageMessage();
         
-        JT808Message message = decoder.decode(messageBuffer);
+        JT808Message message;
+        try {
+            message = decoder.decode(messageBuffer);
+        } catch (Exception e) {
+            fail("解码失败: " + e.getMessage());
+            return;
+        }
         
         assertNotNull(message);
         assertNotNull(message.getHeader());
@@ -301,7 +325,13 @@ class JT808DecoderTest {
         buffer.appendByte((byte) 0x7E); // 结束标识位
 
         // 解码消息
-        JT808Message message = decoder.decode(buffer);
+        JT808Message message;
+        try {
+            message = decoder.decode(buffer);
+        } catch (Exception e) {
+            fail("解码失败: " + e.getMessage());
+            return;
+        }
 
         // 验证解码结果
         assertNotNull(message, "解码后的消息不应为null");

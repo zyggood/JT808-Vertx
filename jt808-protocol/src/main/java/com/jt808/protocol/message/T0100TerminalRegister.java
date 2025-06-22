@@ -182,6 +182,26 @@ public class T0100TerminalRegister extends JT808Message {
         this.plateNumber = plateNumber;
     }
     
+    /**
+     * 获取车牌颜色描述
+     */
+    public String getPlateColorDescription() {
+        switch (plateColor) {
+            case 1:
+                return "蓝色";
+            case 2:
+                return "黄色";
+            case 3:
+                return "黑色";
+            case 4:
+                return "白色";
+            case 9:
+                return "其他";
+            default:
+                return "未知(" + (plateColor & 0xFF) + ")";
+        }
+    }
+    
     @Override
     public String toString() {
         return "T0100TerminalRegister{" +
