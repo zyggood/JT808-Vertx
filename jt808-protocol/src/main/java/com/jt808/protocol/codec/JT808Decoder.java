@@ -3,8 +3,7 @@ package com.jt808.protocol.codec;
 import com.jt808.common.JT808Constants;
 import com.jt808.common.exception.ProtocolException;
 import com.jt808.common.util.ByteUtils;
-import com.jt808.protocol.message.JT808Header;
-import com.jt808.protocol.message.JT808Message;
+import com.jt808.protocol.message.*;
 import io.vertx.core.buffer.Buffer;
 
 /**
@@ -165,9 +164,26 @@ public class JT808Decoder {
      * @return 消息对象
      */
     private JT808Message createMessage(int messageId) {
-        // 这里需要根据消息ID创建具体的消息类型
-        // 暂时返回一个通用的消息对象
-        return new GenericJT808Message(messageId);
+        // 根据消息ID创建对应的消息实例
+        switch (messageId) {
+            case 0x0001: // 终端通用应答
+                return new T0001TerminalCommonResponse();
+            case 0x0002: // 终端心跳
+                return new T0002TerminalHeartbeat();
+            case 0x0100: // 终端注册
+                return new T0100TerminalRegister();
+            case 0x0102: // 终端鉴权
+                return new T0102TerminalAuth();
+            case 0x0200: // 位置信息汇报
+                return new T0200LocationReport();
+            case 0x8001: // 平台通用应答
+                return new T8001PlatformCommonResponse();
+            case 0x8100: // 终端注册应答
+                return new T8100TerminalRegisterResponse();
+            default:
+                // 未知消息类型，使用通用消息
+                return new GenericJT808Message(messageId);
+        }
     }
     
     /**

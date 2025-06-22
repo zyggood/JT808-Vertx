@@ -174,7 +174,7 @@ class JT808DecoderTest {
         content.appendUnsignedShort(0x0001);
         
         // 消息体属性
-        content.appendUnsignedShort(0x0002); // 消息体长度为2
+        content.appendUnsignedShort(0x0005); // 消息体长度为5
         
         // 终端手机号
         byte[] phoneBcd = ByteUtils.toBCD(123456789012L, 6);
@@ -183,9 +183,10 @@ class JT808DecoderTest {
         // 消息流水号
         content.appendUnsignedShort(1);
         
-        // 消息体（包含转义字符）
-        content.appendByte((byte) 0x7E); // 需要转义
-        content.appendByte((byte) 0x7D); // 需要转义
+        // 消息体（终端通用应答：应答流水号2字节 + 应答ID2字节 + 结果1字节）
+        content.appendUnsignedShort(1); // 应答流水号
+        content.appendUnsignedShort(0x8001); // 应答ID
+        content.appendByte((byte) 0x00); // 结果：成功
         
         // 校验码
         byte checksum = ByteUtils.calculateChecksum(content.getBytes(), 0, content.length());
