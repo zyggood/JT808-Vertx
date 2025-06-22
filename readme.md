@@ -15,7 +15,7 @@
 
 ## 技术栈
 
-- **JDK**: OpenJDK 25
+- **JDK**: OpenJDK 21
 - **框架**: Vert.x 4.x
 - **构建工具**: Maven
 - **数据库**: H2/MySQL/PostgreSQL
@@ -55,7 +55,7 @@ jt808-vertx/
 
 ### 环境要求
 
-- JDK 25+
+- JDK 21+
 - Maven 3.6+
 
 ### 编译项目
@@ -169,7 +169,7 @@ mvn -pl jt808-server vertx:run
 
 ### 环境要求
 
-- OpenJDK 25+
+- OpenJDK 21+
 - Maven 3.8+
 
 ### 构建项目
