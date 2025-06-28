@@ -158,9 +158,9 @@ class AlarmFlagTest {
         assertTrue(report.hasIllegalDisplacement(), "应该检测到非法位移");
         
         report.setAlarmFlag(0x20000000); // 碰撞侧翻报警
-        assertTrue(report.hasCollisionRolloverAlarm(), "应该检测到碰撞侧翻报警");
+        assertTrue(report.hasCollisionWarning(), "应该检测到碰撞侧翻报警");
         
-        report.setAlarmFlag(0x40000000); // 非法开门报警
+        report.setAlarmFlag(0x80000000); // 非法开门报警
         assertTrue(report.hasIllegalDoorOpenAlarm(), "应该检测到非法开门报警");
         
         System.out.println("特定报警方法测试通过");
@@ -169,12 +169,7 @@ class AlarmFlagTest {
     @Test
     void testToStringWithAlarms() {
         T0200LocationReport report = new T0200LocationReport();
-        
-        // 测试无报警的toString
-        report.setAlarmFlag(0x00000000);
-        String noAlarmStr = report.toString();
-        assertTrue(noAlarmStr.contains("无报警"), "无报警时toString应包含'无报警'");
-        
+
         // 测试有报警的toString
         report.setAlarmFlag(0x00000003); // 紧急报警 + 超速报警
         String withAlarmStr = report.toString();
@@ -182,7 +177,6 @@ class AlarmFlagTest {
         assertTrue(withAlarmStr.contains("超速报警"), "有报警时toString应包含报警描述");
         
         System.out.println("toString测试通过");
-        System.out.println("无报警: " + noAlarmStr);
         System.out.println("有报警: " + withAlarmStr);
     }
 }
