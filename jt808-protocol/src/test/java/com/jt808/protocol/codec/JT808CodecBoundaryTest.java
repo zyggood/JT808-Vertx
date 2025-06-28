@@ -3,13 +3,12 @@ package com.jt808.protocol.codec;
 import com.jt808.protocol.message.*;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -146,7 +145,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(register);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0100TerminalRegister);
+            assertInstanceOf(T0100TerminalRegister.class, decoded);
             T0100TerminalRegister decodedRegister = (T0100TerminalRegister) decoded;
             assertEquals(longPlateNumber, decodedRegister.getPlateNumber());
         } catch (Exception e) {
@@ -172,7 +171,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(register);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0100TerminalRegister);
+            assertInstanceOf(T0100TerminalRegister.class, decoded);
             T0100TerminalRegister decodedRegister = (T0100TerminalRegister) decoded;
             assertEquals("", decodedRegister.getPlateNumber());
         } catch (Exception e) {
@@ -199,7 +198,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(register);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0100TerminalRegister);
+            assertInstanceOf(T0100TerminalRegister.class, decoded);
             T0100TerminalRegister decodedRegister = (T0100TerminalRegister) decoded;
             assertEquals(plateColor, decodedRegister.getPlateColor());
         } catch (Exception e) {
@@ -226,7 +225,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(location);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0200LocationReport);
+            assertInstanceOf(T0200LocationReport.class, decoded);
             T0200LocationReport decodedLocation = (T0200LocationReport) decoded;
             
             // 验证坐标精度（允许小的误差）
@@ -259,7 +258,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(location);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0200LocationReport);
+            assertInstanceOf(T0200LocationReport.class, decoded);
             T0200LocationReport decodedLocation = (T0200LocationReport) decoded;
             
             assertEquals(0.0, decodedLocation.getLatitudeDegrees());
@@ -277,9 +276,7 @@ class JT808CodecBoundaryTest {
     void testMaxLengthAuthCode() {
         // 创建一个很长的鉴权码
         StringBuilder longAuthCode = new StringBuilder();
-        for (int i = 0; i < 100; i++) {
-            longAuthCode.append("AUTH");
-        }
+        longAuthCode.append("A".repeat(255));
         
         T0102TerminalAuth auth = new T0102TerminalAuth(longAuthCode.toString());
         JT808Header header = new JT808Header(0x0102, "13800138000", 1);
@@ -288,7 +285,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(auth);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0102TerminalAuth);
+            assertInstanceOf(T0102TerminalAuth.class, decoded);
             T0102TerminalAuth decodedAuth = (T0102TerminalAuth) decoded;
             assertEquals(longAuthCode.toString(), decodedAuth.getAuthCode());
         } catch (Exception e) {
@@ -309,7 +306,7 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(auth);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0102TerminalAuth);
+            assertInstanceOf(T0102TerminalAuth.class, decoded);
             T0102TerminalAuth decodedAuth = (T0102TerminalAuth) decoded;
             assertEquals(specialAuthCode, decodedAuth.getAuthCode());
         } catch (Exception e) {
@@ -336,8 +333,8 @@ class JT808CodecBoundaryTest {
         Buffer encoded = encoder.encode(location);
         try {
             JT808Message decoded = decoder.decode(encoded);
-            
-            assertTrue(decoded instanceof T0200LocationReport);
+
+            assertInstanceOf(T0200LocationReport.class, decoded);
             T0200LocationReport decodedLocation = (T0200LocationReport) decoded;
             assertEquals(allAlarms, decodedLocation.getAlarmFlag());
             assertEquals(0xFFFFFFFF, decodedLocation.getStatusFlag());
@@ -356,9 +353,7 @@ class JT808CodecBoundaryTest {
         
         // 创建很长的字符串字段
         StringBuilder longString = new StringBuilder();
-        for (int i = 0; i < 50; i++) {
-            longString.append("MANUFACTURER");
-        }
+        longString.append("MANUFACTURER".repeat(50));
         
         register.setManufacturerId(longString.toString());
         register.setTerminalModel(longString.toString());
@@ -403,7 +398,7 @@ class JT808CodecBoundaryTest {
         // 解码应该恢复原始数据
         try {
             JT808Message decoded = decoder.decode(encoded);
-            assertTrue(decoded instanceof T0102TerminalAuth);
+            assertInstanceOf(T0102TerminalAuth.class, decoded);
             T0102TerminalAuth decodedAuth = (T0102TerminalAuth) decoded;
             assertEquals("AUTH\u007E\u007D", decodedAuth.getAuthCode());
         } catch (Exception e) {
@@ -448,12 +443,8 @@ class JT808CodecBoundaryTest {
         register.setCityId(1);
         
         // 创建超长字符串以触发分包
-        StringBuilder veryLongString = new StringBuilder();
-        for (int i = 0; i < 200; i++) {
-            veryLongString.append("VERY_LONG_MANUFACTURER_ID_");
-        }
-        
-        register.setManufacturerId(veryLongString.toString());
+
+        register.setManufacturerId("VERY_LONG_MANUFACTURER_ID_".repeat(200));
         register.setTerminalModel("MODEL");
         register.setTerminalId("TERMINAL");
         register.setPlateColor((byte) 1);

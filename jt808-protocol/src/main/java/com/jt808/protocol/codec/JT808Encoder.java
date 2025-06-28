@@ -76,8 +76,8 @@ public class JT808Encoder {
         // 终端手机号（6字节BCD码）
         String phoneNumber = header.getPhoneNumber();
         if (phoneNumber != null && phoneNumber.length() <= 12) {
-            // 补齐到12位
-            phoneNumber = String.format("%-12s", phoneNumber).replace(' ', '0');
+            // 左侧补齐到12位（用0填充）
+            phoneNumber = String.format("%012d", Long.parseLong(phoneNumber));
             byte[] phoneBcd = ByteUtils.toBCD(Long.parseLong(phoneNumber), 6);
             buffer.appendBytes(phoneBcd);
         } else {

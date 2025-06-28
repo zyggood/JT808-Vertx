@@ -2,7 +2,9 @@ package com.jt808.protocol.codec;
 
 import com.jt808.common.exception.ProtocolException;
 import com.jt808.common.util.ByteUtils;
+import com.jt808.protocol.message.JT808Header;
 import com.jt808.protocol.message.JT808Message;
+import com.jt808.protocol.message.T0200LocationReport;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -341,11 +343,181 @@ class JT808DecoderTest {
         assertEquals(0x0200, message.getMessageId(), "消息ID应为0x0200");
 
         // 验证终端手机号
-        assertEquals("12345678901", message.getHeader().getPhoneNumber(), "终端手机号应为123456789017");
+        assertEquals("12345678901", message.getHeader().getPhoneNumber(), "终端手机号应为12345678901");
 
+        // 验证这是一个T0200LocationReport消息
+        assertTrue(message instanceof T0200LocationReport, "消息应为T0200LocationReport类型");
+        
+        T0200LocationReport locationReport = (T0200LocationReport) message;
+        
+        // 验证位置信息字段
         System.out.println("消息解码成功:");
         System.out.println("消息ID: 0x" + Integer.toHexString(message.getMessageId()).toUpperCase());
         System.out.println("终端手机号: " + message.getHeader().getPhoneNumber());
         System.out.println("消息体长度: " + message.getHeader().getBodyLength());
+        System.out.println("报警标志位: 0x" + Integer.toHexString(locationReport.getAlarmFlag()).toUpperCase());
+        System.out.println("状态位: 0x" + Integer.toHexString(locationReport.getStatusFlag()).toUpperCase());
+        System.out.println("纬度: " + locationReport.getLatitudeDegrees() + "°");
+        System.out.println("经度: " + locationReport.getLongitudeDegrees() + "°");
+        System.out.println("高程: " + locationReport.getAltitude() + "m");
+        System.out.println("速度: " + locationReport.getSpeedKmh() + "km/h");
+        System.out.println("方向: " + locationReport.getDirection() + "°");
+        System.out.println("时间: " + locationReport.getDateTime());
+        
+        // 验证基本字段不为空或默认值
+        assertNotNull(locationReport.getDateTime(), "时间不应为null");
+        assertTrue(locationReport.getLatitude() != 0 || locationReport.getLongitude() != 0, "经纬度不应都为0");
+        
+        System.out.println("message header: " + message.getHeader().toString());
+        System.out.println("完整位置报告: " + locationReport.toString());
     }
+
+    @Test
+    public void testEncodeDecodeLocationReport() {
+        try {
+            // 创建位置报告消息
+            T0200LocationReport originalReport = new T0200LocationReport();
+            
+            // 设置消息头
+            JT808Header header = new JT808Header();
+            header.setMessageId(0x0200);
+            header.setPhoneNumber("123456789012");
+            header.setSerialNumber(12345);
+            originalReport.setHeader(header);
+            
+            // 设置位置信息
+            originalReport.setAlarmFlag(0x00000001); // 紧急报警
+            originalReport.setStatusFlag(0x00000002); // 已定位
+            originalReport.setLatitude(39906000); // 北京纬度
+            originalReport.setLongitude(116397000); // 北京经度
+            originalReport.setAltitude(100);
+            originalReport.setSpeed(600); // 60km/h
+            originalReport.setDirection(180);
+            originalReport.setDateTime(java.time.LocalDateTime.of(2023, 3, 15, 14, 30, 0)); // 2023-03-15 14:30:00
+            
+            System.out.println("原始报告: " + originalReport);
+            
+            // 编码
+            JT808Encoder encoder = new JT808Encoder();
+            Buffer encoded = encoder.encode(originalReport);
+            System.out.println("编码后: " + encoded.toString());
+            
+            // 解码
+            JT808Decoder decoder = new JT808Decoder();
+            JT808Message decoded = decoder.decode(encoded);
+            System.out.println("解码报告: " + decoded);
+            
+            // 验证解码成功
+            assertNotNull(decoded);
+            assertTrue(decoded instanceof T0200LocationReport);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("测试失败: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testAlarmFlagParsing() {
+        // 测试报警标志位解析功能
+        T0200LocationReport report = new T0200LocationReport();
+        
+        // 测试单个报警位
+        report.setAlarmFlag(0x00000001); // 紧急报警
+        assertTrue(report.hasEmergencyAlarm(), "应该检测到紧急报警");
+        assertFalse(report.hasSpeedingAlarm(), "不应该检测到超速报警");
+        
+        report.setAlarmFlag(0x00000002); // 超速报警
+        assertFalse(report.hasEmergencyAlarm(), "不应该检测到紧急报警");
+        assertTrue(report.hasSpeedingAlarm(), "应该检测到超速报警");
+        
+        // 测试多个报警位组合
+        report.setAlarmFlag(0x00000003); // 紧急报警 + 超速报警
+        assertTrue(report.hasEmergencyAlarm(), "应该检测到紧急报警");
+        assertTrue(report.hasSpeedingAlarm(), "应该检测到超速报警");
+        assertFalse(report.hasFatigueAlarm(), "不应该检测到疲劳驾驶");
+        
+        // 测试高位报警
+        report.setAlarmFlag(0x04000000); // 车辆被盗
+        assertTrue(report.hasVehicleTheft(), "应该检测到车辆被盗报警");
+        assertFalse(report.hasEmergencyAlarm(), "不应该检测到其他报警");
+        
+        // 测试复杂组合
+        report.setAlarmFlag(0x0400000B); // 车辆被盗 + 危险预警 + 超速 + 紧急
+        assertTrue(report.hasEmergencyAlarm(), "应该检测到紧急报警");
+        assertTrue(report.hasSpeedingAlarm(), "应该检测到超速报警");
+        assertTrue(report.hasDangerWarning(), "应该检测到危险预警");
+        assertTrue(report.hasVehicleTheft(), "应该检测到车辆被盗");
+        assertFalse(report.hasFatigueAlarm(), "不应该检测到疲劳驾驶");
+        
+        // 测试报警描述功能
+        java.util.List<String> alarms = report.getActiveAlarmDescriptions();
+        assertEquals(4, alarms.size(), "应该有4个激活的报警");
+        assertTrue(alarms.contains("紧急报警"), "应该包含紧急报警描述");
+        assertTrue(alarms.contains("超速报警"), "应该包含超速报警描述");
+        assertTrue(alarms.contains("危险预警"), "应该包含危险预警描述");
+        assertTrue(alarms.contains("车辆被盗"), "应该包含车辆被盗描述");
+        
+        // 测试无报警情况
+        report.setAlarmFlag(0x00000000);
+        java.util.List<String> noAlarms = report.getActiveAlarmDescriptions();
+        assertTrue(noAlarms.isEmpty(), "无报警时应该返回空列表");
+        
+        System.out.println("报警标志位解析测试通过");
+    }
+    
+    @Test
+    public void testAllAlarmFlags() {
+        // 测试所有定义的报警标志位
+        T0200LocationReport report = new T0200LocationReport();
+        
+        // 测试所有单独的报警位
+        int[] alarmBits = {
+            0x00000001, // 紧急报警
+            0x00000002, // 超速报警
+            0x00000004, // 疲劳驾驶
+            0x00000008, // 危险预警
+            0x00000010, // GNSS模块故障
+            0x00000020, // GNSS天线未接或被剪断
+            0x00000040, // GNSS天线短路
+            0x00000080, // 终端主电源欠压
+            0x00000100, // 终端主电源掉电
+            0x00000200, // 终端LCD或显示器故障
+            0x00000400, // TTS模块故障
+            0x00000800, // 摄像头故障
+            0x00040000, // 当天累计驾驶超时
+            0x00080000, // 超时停车
+            0x00100000, // 进出区域报警
+            0x00200000, // 进出路线报警
+            0x00400000, // 路段行驶时间不足/过长
+            0x00800000, // 路线偏离报警
+            0x01000000, // 车辆VSS故障
+            0x02000000, // 车辆油量异常
+            0x04000000, // 车辆被盗
+            0x08000000, // 车辆非法点火
+            0x10000000, // 车辆非法位移
+            0x20000000, // 碰撞侧翻报警
+            0x40000000  // 非法开门报警
+        };
+        
+        for (int alarmBit : alarmBits) {
+            report.setAlarmFlag(alarmBit);
+            java.util.List<String> alarms = report.getActiveAlarmDescriptions();
+            assertEquals(1, alarms.size(), 
+                "每个报警位应该只激活一个报警: 0x" + Integer.toHexString(alarmBit));
+        }
+        
+        // 测试所有报警位同时激活
+        int allAlarms = 0;
+        for (int alarmBit : alarmBits) {
+            allAlarms |= alarmBit;
+        }
+        report.setAlarmFlag(allAlarms);
+        java.util.List<String> allActiveAlarms = report.getActiveAlarmDescriptions();
+        assertEquals(25, allActiveAlarms.size(), "所有报警位激活时应该有25个报警");
+        
+        System.out.println("所有报警标志位测试通过，共测试了 " + alarmBits.length + " 个报警位");
+        System.out.println("激活所有报警时的描述: " + String.join(", ", allActiveAlarms));
+    }
+
 }

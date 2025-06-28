@@ -84,17 +84,13 @@ public class BasicMessageValidator implements MessageValidator {
         }
         
         // 验证消息属性
-        if (header.getMessageProperties() < 0) {
+        if (header.getMessageProperty() < 0) {
             errors.add(new ValidationError("INVALID_MESSAGE_PROPERTIES", 
-                    "Message properties cannot be negative", "messageProperties", header.getMessageProperties()));
+                    "Message properties cannot be negative", "messageProperties", header.getMessageProperty()));
         }
         
         // 验证消息体长度属性
-        int bodyLength = header.getMessageProperties() & 0x3FF; // 低10位为消息体长度
-        if (bodyLength < 0 || bodyLength > 1023) {
-            errors.add(new ValidationError("INVALID_BODY_LENGTH_PROPERTY", 
-                    "Body length in message properties is invalid", "bodyLength", bodyLength));
-        }
+        int bodyLength = header.getMessageProperty() & 0x3FF; // 低10位为消息体长度
     }
     
     /**
@@ -108,7 +104,7 @@ public class BasicMessageValidator implements MessageValidator {
         
         // 如果消息有编码后的数据，验证长度一致性
         try {
-            byte[] encodedBody = message.encodeBody();
+            byte[] encodedBody = message.encodeBody().getBytes();
             if (encodedBody != null && encodedBody.length != declaredLength) {
                 if (strict) {
                     errors.add(new ValidationError("BODY_LENGTH_MISMATCH", 
@@ -155,7 +151,7 @@ public class BasicMessageValidator implements MessageValidator {
     private void validateTerminalPhone(JT808Header header, List<ValidationError> errors, List<ValidationWarning> warnings) {
         if (header == null) return;
         
-        String terminalPhone = header.getTerminalPhone();
+        String terminalPhone = header.getPhoneNumber();
         
         if (terminalPhone == null || terminalPhone.trim().isEmpty()) {
             errors.add(new ValidationError("EMPTY_TERMINAL_PHONE", 

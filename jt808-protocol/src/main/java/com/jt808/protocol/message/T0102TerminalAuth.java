@@ -57,8 +57,10 @@ public class T0102TerminalAuth extends JT808Message {
         // 鉴权码长度 (1字节)
         if (authCode != null) {
             byte[] authBytes = authCode.getBytes();
-            buffer.appendByte((byte) authBytes.length);
-            buffer.appendBytes(authBytes);
+            // 鉴权码长度不能超过255字节（1字节长度字段的最大值）
+            int authLength = Math.min(authBytes.length, 255);
+            buffer.appendByte((byte) authLength);
+            buffer.appendBytes(authBytes, 0, authLength);
         } else {
             buffer.appendByte((byte) 0);
         }

@@ -122,6 +122,8 @@ public class T0100TerminalRegister extends JT808Message {
         if (index < body.length()) {
             byte[] plateBytes = body.getBytes(index, body.length());
             plateNumber = new String(plateBytes);
+        } else {
+            plateNumber = ""; // 确保空车牌号返回空字符串而不是null
         }
     }
     

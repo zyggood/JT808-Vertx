@@ -36,7 +36,7 @@ class AlarmFlagTest {
         assertFalse(report.hasEmergencyAlarm(), "不应该检测到其他报警");
         
         // 测试复杂组合
-        report.setAlarmFlag(0x04000007); // 车辆被盗 + 危险预警 + 超速 + 紧急
+        report.setAlarmFlag(0x0400000B); // 车辆被盗 + 危险预警 + 超速 + 紧急
         assertTrue(report.hasEmergencyAlarm(), "应该检测到紧急报警");
         assertTrue(report.hasSpeedingAlarm(), "应该检测到超速报警");
         assertTrue(report.hasDangerWarning(), "应该检测到危险预警");

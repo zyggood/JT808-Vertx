@@ -107,6 +107,7 @@ public final class ByteUtils {
      * 十六进制字符串转字节数组
      * @param hex 十六进制字符串
      * @return 字节数组
+     * TODO 非法数据抛出异常
      */
     public static byte[] hexToBytes(String hex) {
         int length = hex.length();

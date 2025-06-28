@@ -105,8 +105,20 @@ public class JT808Decoder {
         // 终端手机号（6字节BCD码）
         byte[] phoneBcd = new byte[6];
         buffer.getBytes(offset, offset + 6, phoneBcd);
-        long phoneNumber = ByteUtils.fromBCD(phoneBcd);
-        header.setPhoneNumber(String.valueOf(phoneNumber));
+        // 解码BCD并保持12位格式（保留前导零）
+        StringBuilder phoneBuilder = new StringBuilder();
+        for (byte b : phoneBcd) {
+            int high = (b >> 4) & 0x0F;
+            int low = b & 0x0F;
+            phoneBuilder.append(high).append(low);
+        }
+        // 移除前导零，但保留至少一位数字
+        String phoneStr = phoneBuilder.toString();
+        phoneStr = phoneStr.replaceAll("^0+", ""); // 移除开头的0
+        if (phoneStr.isEmpty()) {
+            phoneStr = "0";
+        }
+        header.setPhoneNumber(phoneStr);
         offset += 6;
         
         // 消息流水号（2字节）
