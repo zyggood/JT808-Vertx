@@ -946,12 +946,170 @@ public class T0200LocationReport extends JT808Message {
         if (parsedAdditionalInfo != null && !parsedAdditionalInfo.isEmpty()) {
             sb.append("  解析后的附加信息: \n");
             for (Map.Entry<Integer, Object> entry : parsedAdditionalInfo.entrySet()) {
-                sb.append("    ID 0x").append(String.format("%02X", entry.getKey()))
-                  .append(": ").append(entry.getValue().toString()).append("\n");
+                int id = entry.getKey();
+                Object value = entry.getValue();
+                sb.append("    ID 0x").append(String.format("%02X", id))
+                  .append(" (").append(getAdditionalInfoDescription(id)).append("): ")
+                  .append(formatAdditionalInfoValue(id, value)).append("\n");
             }
         }
         
         sb.append("}");
         return sb.toString();
+    }
+    
+    /**
+     * 获取附加信息ID的描述
+     * @param id 附加信息ID
+     * @return 描述信息
+     */
+    private String getAdditionalInfoDescription(int id) {
+        return switch (id) {
+            case 0x01 -> "里程";
+            case 0x02 -> "油量";
+            case 0x03 -> "行驶记录速度";
+            case 0x04 -> "报警事件ID";
+            case 0x11 -> "超速报警附加信息";
+            case 0x12 -> "进出区域/路线报警附加信息";
+            case 0x13 -> "路段行驶时间报警附加信息";
+            case 0x25 -> "扩展车辆信号状态位";
+            case 0x2A -> "IO状态位";
+            case 0x2B -> "模拟量";
+            case 0x30 -> "无线通信网络信号强度";
+            case 0x31 -> "GNSS定位卫星数";
+            default -> "自定义信息";
+        };
+    }
+    
+    /**
+     * 格式化附加信息值的显示
+     * @param id 附加信息ID
+     * @param value 值
+     * @return 格式化后的字符串
+     */
+    private String formatAdditionalInfoValue(int id, Object value) {
+        return switch (id) {
+            case 0x01 -> String.format("%.1f km", (Double) value);
+            case 0x02 -> String.format("%.1f L", (Double) value);
+            case 0x03 -> String.format("%.1f km/h", (Double) value);
+            case 0x04 -> String.valueOf((Integer) value);
+            case 0x11, 0x12, 0x13 -> formatMapValue((Map<String, Object>) value);
+            case 0x25 -> formatExtendedVehicleSignalStatus((Map<String, Boolean>) value);
+            case 0x2A -> formatIOStatus((Map<String, Boolean>) value);
+            case 0x2B -> formatAnalogValue((Map<String, Integer>) value);
+            case 0x30 -> value + " dBm";
+            case 0x31 -> value + " 颗";
+            default -> {
+                if (value instanceof byte[]) {
+                    byte[] bytes = (byte[]) value;
+                    StringBuilder hex = new StringBuilder();
+                    for (byte b : bytes) {
+                        hex.append(String.format("%02X ", b));
+                    }
+                    yield hex.toString().trim();
+                } else {
+                    yield value.toString();
+                }
+            }
+        };
+    }
+    
+    /**
+     * 格式化Map类型的值
+     */
+    private String formatMapValue(Map<String, Object> map) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        boolean first = true;
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (!first) sb.append(", ");
+            sb.append(entry.getKey()).append("=").append(entry.getValue());
+            first = false;
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+    
+    /**
+     * 格式化扩展车辆信号状态位
+     */
+    private String formatExtendedVehicleSignalStatus(Map<String, Boolean> status) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        boolean first = true;
+        for (Map.Entry<String, Boolean> entry : status.entrySet()) {
+            if (entry.getValue()) { // 只显示为true的状态
+                if (!first) sb.append(", ");
+                sb.append(getVehicleSignalDescription(entry.getKey()));
+                first = false;
+            }
+        }
+        if (first) sb.append("无激活信号");
+        sb.append("}");
+        return sb.toString();
+    }
+    
+    /**
+     * 格式化IO状态位
+     */
+    private String formatIOStatus(Map<String, Boolean> status) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        boolean first = true;
+        for (Map.Entry<String, Boolean> entry : status.entrySet()) {
+            if (entry.getValue()) { // 只显示为true的状态
+                if (!first) sb.append(", ");
+                sb.append(getIOStatusDescription(entry.getKey()));
+                first = false;
+            }
+        }
+        if (first) sb.append("正常状态");
+        sb.append("}");
+        return sb.toString();
+    }
+    
+    /**
+     * 格式化模拟量
+     */
+    private String formatAnalogValue(Map<String, Integer> values) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{AD0=").append(values.get("AD0"))
+          .append(", AD1=").append(values.get("AD1")).append("}");
+        return sb.toString();
+    }
+    
+    /**
+     * 获取车辆信号的中文描述
+     */
+    private String getVehicleSignalDescription(String key) {
+        return switch (key) {
+            case "lowBeam" -> "近光灯";
+            case "highBeam" -> "远光灯";
+            case "rightTurnSignal" -> "右转向灯";
+            case "leftTurnSignal" -> "左转向灯";
+            case "brake" -> "制动";
+            case "reverse" -> "倒车";
+            case "fogLight" -> "雾灯";
+            case "positionLight" -> "示廓灯";
+            case "horn" -> "喇叭";
+            case "airConditioner" -> "空调";
+            case "neutral" -> "空挡";
+            case "retarder" -> "缓速器";
+            case "abs" -> "ABS";
+            case "heater" -> "加热器";
+            case "clutch" -> "离合器";
+            default -> key;
+        };
+    }
+    
+    /**
+     * 获取IO状态的中文描述
+     */
+    private String getIOStatusDescription(String key) {
+        return switch (key) {
+            case "deepSleep" -> "深度休眠";
+            case "sleep" -> "休眠";
+            default -> key;
+        };
     }
 }
