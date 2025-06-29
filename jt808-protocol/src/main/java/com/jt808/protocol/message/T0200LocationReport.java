@@ -963,7 +963,7 @@ public class T0200LocationReport extends JT808Message {
      * @param id 附加信息ID
      * @return 描述信息
      */
-    private String getAdditionalInfoDescription(int id) {
+    String getAdditionalInfoDescription(int id) {
         return switch (id) {
             case 0x01 -> "里程";
             case 0x02 -> "油量";

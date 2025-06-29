@@ -157,13 +157,71 @@ class AlarmFlagTest {
         report.setAlarmFlag(0x10000000); // 车辆非法位移
         assertTrue(report.hasIllegalDisplacement(), "应该检测到非法位移");
         
-        report.setAlarmFlag(0x20000000); // 碰撞侧翻报警
-        assertTrue(report.hasCollisionWarning(), "应该检测到碰撞侧翻报警");
-        
         report.setAlarmFlag(0x80000000); // 非法开门报警
         assertTrue(report.hasIllegalDoorOpenAlarm(), "应该检测到非法开门报警");
         
         System.out.println("特定报警方法测试通过");
+    }
+    
+    @Test
+    void testCollisionAndRolloverAlarms() {
+        // 测试碰撞预警和侧翻预警的分离
+        T0200LocationReport report = new T0200LocationReport();
+        
+        // 测试碰撞预警（第29位）
+        report.setAlarmFlag(0x10000000); // 第29位
+        assertTrue(report.hasCollisionWarning(), "应该检测到碰撞预警");
+        assertFalse(report.hasRolloverWarning(), "不应该检测到侧翻预警");
+        
+        // 测试侧翻预警（第30位）
+        report.setAlarmFlag(0x20000000); // 第30位
+        assertFalse(report.hasCollisionWarning(), "不应该检测到碰撞预警");
+        assertTrue(report.hasRolloverWarning(), "应该检测到侧翻预警");
+        
+        // 测试同时有碰撞和侧翻预警
+        report.setAlarmFlag(0x30000000); // 第29位 + 第30位
+        assertTrue(report.hasCollisionWarning(), "应该检测到碰撞预警");
+        assertTrue(report.hasRolloverWarning(), "应该检测到侧翻预警");
+        
+        // 验证报警描述
+        List<String> alarms = report.getActiveAlarmDescriptions();
+        assertTrue(alarms.contains("碰撞预警"), "应该包含碰撞预警描述");
+        assertTrue(alarms.contains("侧翻预警"), "应该包含侧翻预警描述");
+        
+        System.out.println("碰撞和侧翻预警分离测试通过");
+    }
+    
+    @Test
+    void testNewAlarmTypes() {
+        // 测试新增的报警类型
+        T0200LocationReport report = new T0200LocationReport();
+        
+        // 测试IC卡模块故障
+        report.setAlarmFlag(0x00001000); // 第13位
+        assertTrue(report.hasICCardFault(), "应该检测到IC卡模块故障");
+        
+        // 测试超速预警
+        report.setAlarmFlag(0x00002000); // 第14位
+        assertTrue(report.hasSpeedingWarning(), "应该检测到超速预警");
+        
+        // 测试疲劳驾驶预警
+        report.setAlarmFlag(0x00004000); // 第15位
+        assertTrue(report.hasFatigueWarning(), "应该检测到疲劳驾驶预警");
+        
+        // 测试组合报警
+        report.setAlarmFlag(0x00007000); // IC卡故障 + 超速预警 + 疲劳驾驶预警
+        assertTrue(report.hasICCardFault(), "应该检测到IC卡模块故障");
+        assertTrue(report.hasSpeedingWarning(), "应该检测到超速预警");
+        assertTrue(report.hasFatigueWarning(), "应该检测到疲劳驾驶预警");
+        
+        // 验证报警描述
+        List<String> alarms = report.getActiveAlarmDescriptions();
+        assertEquals(3, alarms.size(), "应该有3个激活的报警");
+        assertTrue(alarms.contains("IC卡模块故障"), "应该包含IC卡模块故障描述");
+        assertTrue(alarms.contains("超速预警"), "应该包含超速预警描述");
+        assertTrue(alarms.contains("疲劳驾驶预警"), "应该包含疲劳驾驶预警描述");
+        
+        System.out.println("新增报警类型测试通过");
     }
     
     @Test
