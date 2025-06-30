@@ -14,13 +14,13 @@ public class T0100TerminalRegister extends JT808Message {
     /** 市县域ID */
     private int cityId;
     
-    /** 制造商ID (11字节) */
+    /** 制造商ID (5字节) */
     private String manufacturerId;
     
-    /** 终端型号 (30字节) */
+    /** 终端型号 (20字节) */
     private String terminalModel;
     
-    /** 终端ID (30字节) */
+    /** 终端ID (7字节) */
     private String terminalId;
     
     /** 车牌颜色 */
@@ -52,27 +52,27 @@ public class T0100TerminalRegister extends JT808Message {
         // 市县域ID (2字节)
         buffer.appendUnsignedShort(cityId);
         
-        // 制造商ID (11字节，不足补0)
-        byte[] manufacturerBytes = new byte[11];
+        // 制造商ID (5字节，不足补0)
+        byte[] manufacturerBytes = new byte[5];
         if (manufacturerId != null) {
             byte[] srcBytes = manufacturerId.getBytes();
-            System.arraycopy(srcBytes, 0, manufacturerBytes, 0, Math.min(srcBytes.length, 11));
+            System.arraycopy(srcBytes, 0, manufacturerBytes, 0, Math.min(srcBytes.length, 5));
         }
         buffer.appendBytes(manufacturerBytes);
         
-        // 终端型号 (30字节，不足补0)
-        byte[] modelBytes = new byte[30];
+        // 终端型号 (20字节，不足补0)
+        byte[] modelBytes = new byte[20];
         if (terminalModel != null) {
             byte[] srcBytes = terminalModel.getBytes();
-            System.arraycopy(srcBytes, 0, modelBytes, 0, Math.min(srcBytes.length, 30));
+            System.arraycopy(srcBytes, 0, modelBytes, 0, Math.min(srcBytes.length, 20));
         }
         buffer.appendBytes(modelBytes);
         
         // 终端ID (7字节，不足补0)
-        byte[] terminalIdBytes = new byte[30];
+        byte[] terminalIdBytes = new byte[7];
         if (terminalId != null) {
             byte[] srcBytes = terminalId.getBytes();
-            System.arraycopy(srcBytes, 0, terminalIdBytes, 0, Math.min(srcBytes.length, 30));
+            System.arraycopy(srcBytes, 0, terminalIdBytes, 0, Math.min(srcBytes.length, 7));
         }
         buffer.appendBytes(terminalIdBytes);
         
@@ -99,20 +99,20 @@ public class T0100TerminalRegister extends JT808Message {
         cityId = body.getUnsignedShort(index);
         index += 2;
         
-        // 制造商ID (11字节)
-        byte[] manufacturerBytes = body.getBytes(index, index + 11);
+        // 制造商ID (5字节)
+        byte[] manufacturerBytes = body.getBytes(index, index + 5);
         manufacturerId = new String(manufacturerBytes).trim().replace("\0", "");
-        index += 11;
+        index += 5;
         
         // 终端型号 (20字节)
-        byte[] modelBytes = body.getBytes(index, index + 30);
+        byte[] modelBytes = body.getBytes(index, index + 20);
         terminalModel = new String(modelBytes).trim().replace("\0", "");
-        index += 30;
+        index += 20;
         
         // 终端ID (7字节)
-        byte[] terminalIdBytes = body.getBytes(index, index + 30);
+        byte[] terminalIdBytes = body.getBytes(index, index + 7);
         terminalId = new String(terminalIdBytes).trim().replace("\0", "");
-        index += 30;
+        index += 7;
         
         // 车牌颜色 (1字节)
         plateColor = body.getByte(index);
