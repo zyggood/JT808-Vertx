@@ -49,6 +49,7 @@ public class JT808MessageFactory {
         
         // 平台消息
         messageCreators.put(0x8001, T8001PlatformCommonResponse::new);
+        messageCreators.put(0x8003, T8003ResendSubpackageRequest::new);
         messageCreators.put(0x8100, T8100TerminalRegisterResponse::new);
     }
     
