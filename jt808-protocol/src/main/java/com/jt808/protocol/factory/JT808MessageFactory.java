@@ -46,6 +46,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x0100, T0100TerminalRegister::new);
         messageCreators.put(0x0102, T0102TerminalAuth::new);
         messageCreators.put(0x0104, T0104QueryTerminalParametersResponse::new);
+        messageCreators.put(0x0107, T0107QueryTerminalPropertyResponse::new);
         messageCreators.put(0x0200, T0200LocationReport::new);
         
         // 平台消息

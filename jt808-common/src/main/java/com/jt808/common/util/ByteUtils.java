@@ -107,14 +107,27 @@ public final class ByteUtils {
      * 十六进制字符串转字节数组
      * @param hex 十六进制字符串
      * @return 字节数组
-     * TODO 非法数据抛出异常
+     * @throws IllegalArgumentException 当输入字符串为null、长度为奇数或包含非十六进制字符时
      */
     public static byte[] hexToBytes(String hex) {
+        if (hex == null) {
+            throw new IllegalArgumentException("Hex string cannot be null");
+        }
+        if (hex.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string length must be even");
+        }
+        
         int length = hex.length();
         byte[] bytes = new byte[length / 2];
         for (int i = 0; i < length; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                    + Character.digit(hex.charAt(i + 1), 16));
+            int high = Character.digit(hex.charAt(i), 16);
+            int low = Character.digit(hex.charAt(i + 1), 16);
+            
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid hex character in string: " + hex);
+            }
+            
+            bytes[i / 2] = (byte) ((high << 4) + low);
         }
         return bytes;
     }
@@ -124,8 +137,22 @@ public final class ByteUtils {
      * @param value 数值
      * @param length 字节长度
      * @return BCD编码后的字节数组
+     * @throws IllegalArgumentException 当长度为非正数或数值超出指定长度范围时
      */
     public static byte[] toBCD(long value, int length) {
+        if (length <= 0) {
+            throw new IllegalArgumentException("Length must be positive");
+        }
+        if (value < 0) {
+            throw new IllegalArgumentException("Value must be non-negative");
+        }
+        
+        // 检查数值是否超出指定长度的范围
+        long maxValue = (long) Math.pow(10, length * 2) - 1;
+        if (value > maxValue) {
+            throw new IllegalArgumentException("Value " + value + " exceeds maximum for " + length + " bytes BCD");
+        }
+        
         byte[] bcd = new byte[length];
         String str = String.format("%0" + (length * 2) + "d", value);
         for (int i = 0; i < length; i++) {
@@ -140,14 +167,80 @@ public final class ByteUtils {
      * BCD解码
      * @param bcd BCD编码的字节数组
      * @return 数值
+     * @throws IllegalArgumentException 当输入字节数组为null时
      */
     public static long fromBCD(byte[] bcd) {
-        StringBuilder sb = new StringBuilder();
+        if (bcd == null) {
+            throw new IllegalArgumentException("Input byte array cannot be null");
+        }
+        
+        StringBuilder sb = new StringBuilder(bcd.length * 2);
         for (byte b : bcd) {
             int high = (b >> 4) & 0x0F;
             int low = b & 0x0F;
             sb.append(high).append(low);
         }
         return Long.parseLong(sb.toString());
+    }
+    
+    /**
+     * 编码BCD（字符串版本）
+     * @param str 字符串
+     * @param length 字节长度
+     * @return BCD编码后的字节数组
+     */
+    public static byte[] encodeBcd(String str, int length) {
+        if (str == null) {
+            throw new IllegalArgumentException("Input string cannot be null");
+        }
+        if (length <= 0) {
+            throw new IllegalArgumentException("Length must be positive");
+        }
+        
+        byte[] result = new byte[length];
+        if (str.isEmpty()) {
+            return result;
+        }
+        
+        // 确保字符串长度为偶数
+        if (str.length() % 2 != 0) {
+            str = "0" + str;
+        }
+        
+        int maxChars = Math.min(str.length(), length * 2);
+        for (int i = 0; i < maxChars; i += 2) {
+            int high = Character.digit(str.charAt(i), 10);
+            int low = (i + 1 < maxChars) ? Character.digit(str.charAt(i + 1), 10) : 0;
+            
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid BCD character in string: " + str);
+            }
+            
+            result[i / 2] = (byte) ((high << 4) | low);
+        }
+        
+        return result;
+    }
+    
+    /**
+     * 解码BCD（字符串版本）
+     * @param bcd BCD编码的字节数组
+     * @return 字符串
+     */
+    public static String decodeBcd(byte[] bcd) {
+        if (bcd == null) {
+            throw new IllegalArgumentException("Input byte array cannot be null");
+        }
+        
+        StringBuilder sb = new StringBuilder(bcd.length * 2);
+        for (byte b : bcd) {
+            int high = (b >> 4) & 0x0F;
+            int low = b & 0x0F;
+            sb.append(high).append(low);
+        }
+        
+        // 移除前导零
+        String result = sb.toString().replaceAll("^0+", "");
+        return result.isEmpty() ? "0" : result;
     }
 }
