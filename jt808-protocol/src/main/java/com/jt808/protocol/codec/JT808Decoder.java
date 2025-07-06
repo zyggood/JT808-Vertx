@@ -192,6 +192,10 @@ public class JT808Decoder {
                 return new T8001PlatformCommonResponse();
             case 0x8100: // 终端注册应答
                 return new T8100TerminalRegisterResponse();
+            case 0x8104: // 查询终端参数
+                return new T8104QueryTerminalParameters();
+            case 0x8106: // 查询指定终端参数
+                return new T8106QuerySpecificTerminalParameters();
             default:
                 // 未知消息类型，使用通用消息
                 return new GenericJT808Message(messageId);

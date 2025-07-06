@@ -51,6 +51,8 @@ public class JT808MessageFactory {
         messageCreators.put(0x8001, T8001PlatformCommonResponse::new);
         messageCreators.put(0x8003, T8003ResendSubpackageRequest::new);
         messageCreators.put(0x8100, T8100TerminalRegisterResponse::new);
+        messageCreators.put(0x8104, T8104QueryTerminalParameters::new);
+        messageCreators.put(0x8106, T8106QuerySpecificTerminalParameters::new);
     }
     
     /**
