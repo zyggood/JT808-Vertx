@@ -10,6 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @Execution(ExecutionMode.CONCURRENT)
 class JT808PerformanceTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(JT808PerformanceTest.class);
 
     private JT808Encoder encoder;
     private JT808Decoder decoder;
@@ -60,8 +64,8 @@ class JT808PerformanceTest {
         long duration = endTime - startTime;
         double avgTimeMs = (duration / 1_000_000.0) / messageCount;
 
-        System.out.printf("心跳消息编码性能: %d条消息, 总耗时: %.2fms, 平均: %.4fms/条%n",
-                messageCount, duration / 1_000_000.0, avgTimeMs);
+        logger.info("心跳消息编码性能: {}条消息, 总耗时: {}ms, 平均: {}ms/条",
+                messageCount, String.format("%.2f", duration / 1_000_000.0), String.format("%.4f", avgTimeMs));
 
         // 验证性能要求：平均每条消息编码时间应小于0.1ms
         assertTrue(avgTimeMs < 0.1, "心跳消息编码性能不达标: " + avgTimeMs + "ms/条");
@@ -92,8 +96,8 @@ class JT808PerformanceTest {
         long duration = endTime - startTime;
         double avgTimeMs = (duration / 1_000_000.0) / messageCount;
 
-        System.out.printf("位置信息编码性能: %d条消息, 总耗时: %.2fms, 平均: %.4fms/条%n",
-                messageCount, duration / 1_000_000.0, avgTimeMs);
+        logger.info("位置信息编码性能: {}条消息, 总耗时: {}ms, 平均: {}ms/条",
+                messageCount, String.format("%.2f", duration / 1_000_000.0), String.format("%.4f", avgTimeMs));
 
         // 验证性能要求：平均每条消息编码时间应小于0.5ms
         assertTrue(avgTimeMs < 0.5, "位置信息编码性能不达标: " + avgTimeMs + "ms/条");
@@ -137,8 +141,8 @@ class JT808PerformanceTest {
         long duration = endTime - startTime;
         double avgTimeMs = (duration / 1_000_000.0) / messageCount;
 
-        System.out.printf("消息解码性能: %d条消息, 总耗时: %.2fms, 平均: %.4fms/条%n",
-                messageCount, duration / 1_000_000.0, avgTimeMs);
+        logger.info("消息解码性能: {}条消息, 总耗时: {}ms, 平均: {}ms/条",
+                messageCount, String.format("%.2f", duration / 1_000_000.0), String.format("%.4f", avgTimeMs));
 
         // 验证性能要求：平均每条消息解码时间应小于0.5ms
         assertTrue(avgTimeMs < 0.5, "消息解码性能不达标: " + avgTimeMs + "ms/条");
@@ -181,8 +185,8 @@ class JT808PerformanceTest {
         long duration = endTime - startTime;
         double avgTimeMs = (duration / 1_000_000.0) / messageCount;
 
-        System.out.printf("编解码往返性能: %d条消息, 总耗时: %.2fms, 平均: %.4fms/条%n",
-                messageCount, duration / 1_000_000.0, avgTimeMs);
+        logger.info("编解码往返性能: {}条消息, 总耗时: {}ms, 平均: {}ms/条",
+                messageCount, String.format("%.2f", duration / 1_000_000.0), String.format("%.4f", avgTimeMs));
 
         // 验证性能要求：平均每条消息往返时间应小于1ms
         assertTrue(avgTimeMs < 1.0, "编解码往返性能不达标: " + avgTimeMs + "ms/条");
@@ -229,8 +233,8 @@ class JT808PerformanceTest {
         assertEquals(expectedTotal, successCount.get(), "并发编码成功数量不匹配");
 
         double avgTimeMs = (totalTime.get() / 1_000_000.0) / expectedTotal;
-        System.out.printf("并发编码性能: %d线程, 每线程%d条消息, 平均: %.4fms/条%n",
-                threadCount, messagesPerThread, avgTimeMs);
+        logger.info("并发编码性能: {}线程, 每线程{}条消息, 平均: {}ms/条",
+                threadCount, messagesPerThread, String.format("%.4f", avgTimeMs));
 
         // 验证并发性能
         assertTrue(avgTimeMs < 2.0, "并发编码性能不达标: " + avgTimeMs + "ms/条");
@@ -291,8 +295,8 @@ class JT808PerformanceTest {
         assertEquals(expectedTotal, successCount.get(), "并发解码成功数量不匹配");
 
         double avgTimeMs = (totalTime.get() / 1_000_000.0) / expectedTotal;
-        System.out.printf("并发解码性能: %d线程, 每线程%d条消息, 平均: %.4fms/条%n",
-                threadCount, messagesPerThread, avgTimeMs);
+        logger.info("并发解码性能: {}线程, 每线程{}条消息, 平均: {}ms/条",
+                threadCount, messagesPerThread, String.format("%.4f", avgTimeMs));
 
         // 验证并发性能
         assertTrue(avgTimeMs < 2.0, "并发解码性能不达标: " + avgTimeMs + "ms/条");
@@ -334,7 +338,7 @@ class JT808PerformanceTest {
         long finalMemory = runtime.totalMemory() - runtime.freeMemory();
         long memoryLeaked = finalMemory - initialMemory;
 
-        System.out.printf("内存使用情况: 初始=%dKB, 峰值=%dKB, 使用=%dKB, 泄漏=%dKB%n",
+        logger.info("内存使用情况: 初始={}KB, 峰值={}KB, 使用={}KB, 泄漏={}KB",
                 initialMemory / 1024, peakMemory / 1024, memoryUsed / 1024, memoryLeaked / 1024);
 
         // 验证内存使用合理性
@@ -391,8 +395,8 @@ class JT808PerformanceTest {
         long totalTime = decodeTime - startTime;
         double avgTimeMs = (double) totalTime / batchSize;
 
-        System.out.printf("大批量处理性能: %d条消息, 编码耗时: %dms, 解码耗时: %dms, 总耗时: %dms, 平均: %.4fms/条%n",
-                batchSize, encodeTime - startTime, decodeTime - encodeTime, totalTime, avgTimeMs);
+        logger.info("大批量处理性能: {}条消息, 编码耗时: {}ms, 解码耗时: {}ms, 总耗时: {}ms, 平均: {}ms/条",
+                batchSize, encodeTime - startTime, decodeTime - encodeTime, totalTime, String.format("%.4f", avgTimeMs));
 
         // 验证批量处理性能
         assertTrue(avgTimeMs < 2.0, "大批量处理性能不达标: " + avgTimeMs + "ms/条");

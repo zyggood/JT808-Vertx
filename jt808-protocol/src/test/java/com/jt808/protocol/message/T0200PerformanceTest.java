@@ -138,13 +138,16 @@ class T0200PerformanceTest {
         long getterTime = System.nanoTime() - startTime;
         
         // 输出性能结果
-        System.out.printf("基本操作性能测试 (%d次迭代):\n", iterations);
-        System.out.printf("报警检查: %.2f ms (平均 %.2f ns/次)\n", 
-            alarmCheckTime / 1_000_000.0, (double) alarmCheckTime / iterations / 5);
-        System.out.printf("状态检查: %.2f ms (平均 %.2f ns/次)\n", 
-            statusCheckTime / 1_000_000.0, (double) statusCheckTime / iterations / 5);
-        System.out.printf("Getter操作: %.2f ms (平均 %.2f ns/次)\n", 
-            getterTime / 1_000_000.0, (double) getterTime / iterations / 5);
+        logger.info("基本操作性能测试 ({}次迭代):", iterations);
+        logger.info("报警检查: {:.2f} ms (平均 {:.2f} ns/次)", 
+            String.format("%.2f", alarmCheckTime / 1_000_000.0), 
+            String.format("%.2f", (double) alarmCheckTime / iterations / 5));
+        logger.info("状态检查: {:.2f} ms (平均 {:.2f} ns/次)", 
+            String.format("%.2f", statusCheckTime / 1_000_000.0), 
+            String.format("%.2f", (double) statusCheckTime / iterations / 5));
+        logger.info("Getter操作: {:.2f} ms (平均 {:.2f} ns/次)", 
+            String.format("%.2f", getterTime / 1_000_000.0), 
+            String.format("%.2f", (double) getterTime / iterations / 5));
         
         // 性能断言（这些值可能需要根据实际环境调整）
         assertTrue(alarmCheckTime < 100_000_000, "报警检查性能应在100ms内"); // 100ms
@@ -165,9 +168,10 @@ class T0200PerformanceTest {
         }
         long parsingTime = System.nanoTime() - startTime;
         
-        System.out.printf("附加信息解析性能测试 (%d次迭代):\n", iterations);
-        System.out.printf("解析时间: %.2f ms (平均 %.2f μs/次)\n", 
-            parsingTime / 1_000_000.0, (double) parsingTime / iterations / 1000);
+        logger.info("附加信息解析性能测试 ({}次迭代):", iterations);
+        logger.info("解析时间: {} ms (平均 {} μs/次)", 
+            String.format("%.2f", parsingTime / 1_000_000.0), 
+            String.format("%.2f", (double) parsingTime / iterations / 1000));
         
         // 性能断言
         assertTrue(parsingTime < 1_000_000_000, "附加信息解析性能应在1秒内"); // 1秒
@@ -187,9 +191,10 @@ class T0200PerformanceTest {
         }
         long toStringTime = System.nanoTime() - startTime;
         
-        System.out.printf("toString性能测试 (%d次迭代):\n", iterations);
-        System.out.printf("toString时间: %.2f ms (平均 %.2f ms/次)\n", 
-            toStringTime / 1_000_000.0, (double) toStringTime / iterations / 1_000_000);
+        logger.info("toString性能测试 ({}次迭代):", iterations);
+        logger.info("toString时间: {} ms (平均 {} ms/次)", 
+            String.format("%.2f", toStringTime / 1_000_000.0), 
+            String.format("%.2f", (double) toStringTime / iterations / 1_000_000));
         
         // 性能断言
         assertTrue(toStringTime < 5_000_000_000L, "toString性能应在5秒内"); // 5秒
@@ -208,9 +213,10 @@ class T0200PerformanceTest {
         }
         long alarmDescTime = System.nanoTime() - startTime;
         
-        System.out.printf("获取报警描述性能测试 (%d次迭代):\n", iterations);
-        System.out.printf("获取报警描述时间: %.2f ms (平均 %.2f μs/次)\n", 
-            alarmDescTime / 1_000_000.0, (double) alarmDescTime / iterations / 1000);
+        logger.info("获取报警描述性能测试 ({}次迭代):", iterations);
+        logger.info("获取报警描述时间: {} ms (平均 {} μs/次)", 
+            String.format("%.2f", alarmDescTime / 1_000_000.0), 
+            String.format("%.2f", (double) alarmDescTime / iterations / 1000));
         
         // 性能断言
         assertTrue(alarmDescTime < 500_000_000, "获取报警描述性能应在500ms内"); // 500ms
@@ -252,10 +258,10 @@ class T0200PerformanceTest {
         
         long totalTime = System.nanoTime() - totalStartTime;
         
-        System.out.printf("高负载性能测试完成 (%d次迭代):\n", iterations);
-        System.out.printf("总时间: %.2f ms\n", totalTime / 1_000_000.0);
-        System.out.printf("平均每次操作: %.2f μs\n", (double) totalTime / iterations / 1000);
-        System.out.printf("吞吐量: %.0f 操作/秒\n", iterations * 1_000_000_000.0 / totalTime);
+        logger.info("高负载性能测试完成 ({}次迭代):", iterations);
+        logger.info("总时间: {} ms", String.format("%.2f", totalTime / 1_000_000.0));
+        logger.info("平均每次操作: {} μs", String.format("%.2f", (double) totalTime / iterations / 1000));
+        logger.info("吞吐量: {} 操作/秒", String.format("%.0f", iterations * 1_000_000_000.0 / totalTime));
         
         // 性能断言
         assertTrue(totalTime < 30_000_000_000L, "高负载测试应在30秒内完成"); // 30秒
@@ -323,13 +329,15 @@ class T0200PerformanceTest {
         long maxThreadTime = threadTimes.stream().mapToLong(Long::longValue).max().orElse(0);
         double avgThreadTime = threadTimes.stream().mapToLong(Long::longValue).average().orElse(0);
         
-        System.out.printf("并发访问性能测试 (%d线程, 每线程%d次迭代):\n", threadCount, iterationsPerThread);
-        System.out.printf("总时间: %.2f ms\n", totalTime / 1_000_000.0);
-        System.out.printf("成功操作数: %d/%d\n", successCount.get(), threadCount * iterationsPerThread);
-        System.out.printf("线程时间 - 最小: %.2f ms, 最大: %.2f ms, 平均: %.2f ms\n", 
-            minThreadTime / 1_000_000.0, maxThreadTime / 1_000_000.0, avgThreadTime / 1_000_000.0);
-        System.out.printf("总吞吐量: %.0f 操作/秒\n", 
-            successCount.get() * 1_000_000_000.0 / totalTime);
+        logger.info("并发访问性能测试 ({}线程, 每线程{}次迭代):", threadCount, iterationsPerThread);
+        logger.info("总时间: {} ms", String.format("%.2f", totalTime / 1_000_000.0));
+        logger.info("成功操作数: {}/{}", successCount.get(), threadCount * iterationsPerThread);
+        logger.info("线程时间 - 最小: {} ms, 最大: {} ms, 平均: {} ms", 
+            String.format("%.2f", minThreadTime / 1_000_000.0), 
+            String.format("%.2f", maxThreadTime / 1_000_000.0), 
+            String.format("%.2f", avgThreadTime / 1_000_000.0));
+        logger.info("总吞吐量: {} 操作/秒", 
+            String.format("%.0f", successCount.get() * 1_000_000_000.0 / totalTime));
         
         // 验证所有操作都成功完成
         assertEquals(threadCount * iterationsPerThread, successCount.get(), "所有操作都应成功完成");
@@ -365,11 +373,11 @@ class T0200PerformanceTest {
         long usedMemory = runtime.totalMemory() - runtime.freeMemory();
         long memoryIncrease = usedMemory - initialMemory;
         
-        System.out.printf("内存使用测试 (%d个对象):\n", objectCount);
-        System.out.printf("初始内存: %.2f MB\n", initialMemory / 1024.0 / 1024.0);
-        System.out.printf("使用内存: %.2f MB\n", usedMemory / 1024.0 / 1024.0);
-        System.out.printf("内存增长: %.2f MB\n", memoryIncrease / 1024.0 / 1024.0);
-        System.out.printf("平均每对象: %.2f KB\n", (double) memoryIncrease / objectCount / 1024.0);
+        logger.info("内存使用测试 ({}个对象):", objectCount);
+        logger.info("初始内存: {} MB", String.format("%.2f", initialMemory / 1024.0 / 1024.0));
+        logger.info("使用内存: {} MB", String.format("%.2f", usedMemory / 1024.0 / 1024.0));
+        logger.info("内存增长: {} MB", String.format("%.2f", memoryIncrease / 1024.0 / 1024.0));
+        logger.info("平均每对象: {} KB", String.format("%.2f", (double) memoryIncrease / objectCount / 1024.0));
         
         // 内存使用断言（这些值可能需要根据实际环境调整）
         assertTrue(memoryIncrease < 100 * 1024 * 1024, "内存增长应小于100MB"); // 100MB
@@ -416,11 +424,13 @@ class T0200PerformanceTest {
         }
         long toStringTime = System.nanoTime() - startTime;
         
-        System.out.printf("大量附加信息性能测试 (50个附加信息项, %d次迭代):\n", iterations);
-        System.out.printf("解析时间: %.2f ms (平均 %.2f ms/次)\n", 
-            parsingTime / 1_000_000.0, (double) parsingTime / iterations / 1_000_000);
-        System.out.printf("toString时间: %.2f ms (平均 %.2f ms/次)\n", 
-            toStringTime / 1_000_000.0, (double) toStringTime / iterations / 1_000_000);
+        logger.info("大量附加信息性能测试 (50个附加信息项, {}次迭代):", iterations);
+        logger.info("解析时间: {} ms (平均 {} ms/次)", 
+            String.format("%.2f", parsingTime / 1_000_000.0), 
+            String.format("%.2f", (double) parsingTime / iterations / 1_000_000));
+        logger.info("toString时间: {} ms (平均 {} ms/次)", 
+            String.format("%.2f", toStringTime / 1_000_000.0), 
+            String.format("%.2f", (double) toStringTime / iterations / 1_000_000));
         
         // 性能断言
         assertTrue(parsingTime < 5_000_000_000L, "大量附加信息解析应在5秒内完成");
