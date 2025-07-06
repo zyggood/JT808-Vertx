@@ -6,6 +6,7 @@ import com.jt808.protocol.message.T0108TerminalUpgradeResultNotification;
 import com.jt808.protocol.message.T8201PositionInfoQuery;
 import com.jt808.protocol.message.T8202TemporaryLocationTrackingControl;
 import com.jt808.protocol.message.T8203ManualAlarmConfirmation;
+import com.jt808.protocol.message.T8300TextInfoDistribution;
 import com.jt808.protocol.message.T0201PositionInfoQueryResponse;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
@@ -69,6 +70,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8107, T8107QueryTerminalProperty::new);
         messageCreators.put(0x8108, T8108TerminalUpgradePackage::new);
         messageCreators.put(0x8203, T8203ManualAlarmConfirmation::new);
+        messageCreators.put(0x8300, T8300TextInfoDistribution::new);
     }
     
     /**
