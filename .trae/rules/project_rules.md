@@ -2,6 +2,8 @@
 
 ## 代码规范
 
+<CRITICAL_INSTRUCTIONS> 所有编码会话必须优先参考MEMORY.md，并将新发现的架构规则实时更新到该文件 </CRITICAL_INSTRUCTIONS>
+
 ### 命名规范
 
 1. **包命名**

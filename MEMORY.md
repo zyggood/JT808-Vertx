@@ -1,0 +1,254 @@
+# JT808-Vertx 项目记忆文档
+
+> **重要提示**: 所有编码会话必须优先参考此文档，并将新发现的架构规则实时更新到该文件
+
+## 技术栈约束
+
+### 核心技术栈
+- **JDK版本**: OpenJDK 21 (严格要求)
+- **框架**: Vert.x 4.5.1 (事件驱动、非阻塞I/O)
+- **构建工具**: Maven 3.8+
+- **编码**: UTF-8
+- **协议支持**: JT/T 808-2011/2013/2019、JT/T 1078-2016
+
+### 依赖版本管理
+```xml
+<properties>
+    <vertx.version>4.5.1</vertx.version>
+    <junit.version>5.10.1</junit.version>
+    <logback.version>1.4.14</logback.version>
+    <jackson.version>2.16.1</jackson.version>
+    <mockito.version>5.8.0</mockito.version>
+</properties>
+```
+
+### 关键依赖
+- **Vert.x Stack**: 使用BOM管理版本
+- **Jackson**: 2.16.1 (JSON处理)
+- **Logback**: 1.4.14 (日志框架)
+- **JUnit 5**: 5.10.1 (单元测试)
+- **Mockito**: 5.8.0 (Mock测试)
+
+## 项目结构图
+
+```
+jt808-vertx/
+├── pom.xml                           # 根POM，定义版本管理
+├── MEMORY.md                         # 项目记忆文档 (本文件)
+├── OPTIMIZATION_GUIDE.md             # 优化指南
+├── project.md                        # 项目设计文档
+├── readme.md                         # 项目说明
+├── doc/                              # 协议文档
+│   ├── JT808消息架构设计文档.md
+│   ├── JT808组件使用指南.md
+│   └── JTT 808-*.pdf                # 协议标准文档
+├── jt808-common/                     # 公共模块
+│   ├── pom.xml
+│   └── src/main/java/com/jt808/common/
+│       ├── exception/               # 异常定义
+│       └── util/                    # 工具类
+├── jt808-protocol/                   # 协议编解码模块 (核心)
+│   ├── pom.xml
+│   └── src/main/java/com/jt808/protocol/
+│       ├── codec/                   # 编解码器
+│       │   ├── JT808Decoder.java
+│       │   └── JT808Encoder.java
+│       ├── common/                  # 公共定义
+│       │   └── AlarmType.java       # 报警类型枚举
+│       ├── factory/                 # 工厂模式
+│       │   └── JT808MessageFactory.java  # 消息工厂 (单例)
+│       ├── message/                 # 消息定义
+│       │   ├── JT808Message.java    # 消息基类 (抽象)
+│       │   ├── JT808Header.java     # 消息头
+│       │   ├── T0xxx*.java          # 终端消息
+│       │   └── T8xxx*.java          # 平台消息
+│       ├── processor/               # 处理器链模式
+│       │   ├── MessageProcessor.java
+│       │   └── MessageProcessorChain.java
+│       ├── validator/               # 验证器
+│       │   ├── MessageValidator.java
+│       │   └── ValidationChain.java
+│       ├── util/                    # 协议工具类
+│       │   ├── ChecksumUtils.java
+│       │   └── EscapeUtils.java
+│       └── version/                 # 版本管理
+│           ├── ProtocolVersion.java
+│           └── VersionCompatibilityManager.java
+└── jt808-server/                     # 服务器模块
+    ├── pom.xml
+    └── src/main/java/com/jt808/server/
+        ├── verticle/                # Vert.x Verticle
+        ├── handler/                 # 消息处理器
+        ├── session/                 # 会话管理
+        └── web/                     # Web接口
+```
+
+## 核心架构约束
+
+### 1. 消息工厂模式 (关键约束)
+```java
+// ❌ 错误用法 - 构造函数是私有的
+JT808MessageFactory factory = new JT808MessageFactory();
+
+// ✅ 正确用法 - 使用单例
+JT808MessageFactory factory = JT808MessageFactory.getInstance();
+```
+
+### 2. 消息基类设计
+- **JT808Message**: 抽象基类，所有消息必须继承
+- **必须实现的抽象方法**:
+  - `getMessageId()`: 返回消息ID
+  - `encodeBody()`: 编码消息体
+  - `decodeBody(Buffer body)`: 解码消息体
+
+### 3. 消息命名规范
+- **终端消息**: `T0xxx` (如 T0001, T0200, T0201)
+- **平台消息**: `T8xxx` (如 T8001, T8100, T8201)
+- **测试类**: `消息类名 + Test`
+- **示例类**: `消息类名 + Example`
+
+### 4. Buffer使用约束
+- **数据类型**: 统一使用 `io.vertx.core.buffer.Buffer`
+- **字节序**: 网络字节序 (大端序)
+- **编解码**: 使用Buffer的 `appendXxx()` 和 `getXxx()` 方法
+
+### 5. 工具类使用规范
+```java
+// 校验码计算
+ChecksumUtils.calculateChecksum(buffer);
+
+// 转义处理
+EscapeUtils.escape(buffer);    // 编码时转义
+EscapeUtils.unescape(buffer);  // 解码时反转义
+```
+
+## 历史踩坑记录
+
+### 1. JT808MessageFactory 访问控制问题
+**问题**: 尝试使用 `new JT808MessageFactory()` 创建实例
+**错误信息**: `JT808MessageFactory() has private access in JT808MessageFactory`
+**解决方案**: 使用 `JT808MessageFactory.getInstance()` 获取单例
+**影响文件**: 所有使用消息工厂的代码
+
+### 2. 字节序问题
+**问题**: 应答流水号 99999 被解码为 34463
+**原因**: WORD类型值超出范围 (0-65535)，导致字节序错误
+**解决方案**: 使用合适范围内的值进行测试 (如 54321)
+**教训**: 测试数据必须符合协议规范的数据类型范围
+
+### 3. equals/hashCode 空值处理
+**问题**: 测试中 `locationReport` 为 `null` 时 equals 方法失败
+**原因**: 构造函数会自动创建新实例，即使传入 `null`
+**解决方案**: 先创建对象，再通过 setter 方法设置 `null` 值
+```java
+// ❌ 错误方式
+T0201PositionInfoQueryResponse response = new T0201PositionInfoQueryResponse(12345, null);
+
+// ✅ 正确方式
+T0201PositionInfoQueryResponse response = new T0201PositionInfoQueryResponse();
+response.setResponseSerialNumber(12345);
+response.setLocationReport(null);
+```
+
+### 4. 测试数据范围约束
+**约束**: 
+- WORD类型: 0-65535
+- DWORD类型: 0-4294967295
+- BCD码: 必须是有效的BCD格式
+**建议**: 使用协议规范内的合理测试数据
+
+## 编码规范约束
+
+### 1. 包命名规范
+```
+com.jt808.protocol.message     # 消息定义
+com.jt808.protocol.codec       # 编解码器
+com.jt808.protocol.factory     # 工厂类
+com.jt808.protocol.util        # 工具类
+com.jt808.protocol.validator   # 验证器
+com.jt808.protocol.processor   # 处理器
+```
+
+### 2. 异步编程约束
+- **必须使用**: Vert.x的 `Future` 和 `Promise`
+- **禁止阻塞**: Event Loop线程
+- **耗时操作**: 使用 `vertx.executeBlocking()`
+
+### 3. 日志规范
+- **框架**: Logback
+- **格式**: 结构化日志 (JSON格式)
+- **级别**: DEBUG < INFO < WARN < ERROR
+
+### 4. 测试约束
+- **覆盖率**: 不低于80%
+- **框架**: JUnit 5 + Mockito
+- **命名**: 测试方法使用 `test` 前缀
+
+## 性能约束
+
+### 1. 响应时间目标
+- **API响应**: < 200ms
+- **消息处理**: < 10ms
+- **编解码**: < 5ms
+
+### 2. 并发支持
+- **单节点**: 10,000+ 设备同时在线
+- **消息吞吐**: 1,000+ 消息/秒
+- **内存使用**: 避免内存泄漏
+
+### 3. 资源管理
+- **Buffer**: 及时释放
+- **连接**: 使用连接池
+- **线程**: 合理配置线程池大小
+
+## 扩展指南
+
+### 1. 添加新消息类型
+1. 继承 `JT808Message` 抽象类
+2. 实现三个抽象方法
+3. 在 `JT808MessageFactory` 中注册
+4. 编写单元测试
+5. 创建使用示例
+
+### 2. 添加新的报警类型
+1. 在 `AlarmType` 枚举中添加
+2. 更新位标志位定义
+3. 添加描述信息
+
+### 3. 自定义处理器
+1. 实现 `MessageProcessor` 接口
+2. 设置合适的优先级
+3. 考虑异步处理需求
+
+## 调试技巧
+
+### 1. 消息编解码调试
+```java
+// 启用详细日志
+System.setProperty("jt808.debug", "true");
+
+// 打印Buffer内容
+System.out.println("Buffer: " + buffer.toString());
+System.out.println("Hex: " + buffer.toString("hex"));
+```
+
+### 2. 常用调试命令
+```bash
+# 运行特定测试
+mvn test -Dtest=T0201*
+
+# 跳过测试构建
+mvn clean package -DskipTests
+
+# 查看依赖树
+mvn dependency:tree
+```
+
+## 更新记录
+
+- **2024-01-XX**: 初始创建，基于T0201消息实现经验
+- **待更新**: 根据后续开发经验持续更新
+
+---
+
+> **注意**: 此文档应在每次遇到新的架构约束或踩坑经验时及时更新，确保团队开发的一致性和效率。
