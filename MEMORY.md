@@ -157,6 +157,16 @@ response.setLocationReport(null);
 - BCD码: 必须是有效的BCD格式
 **建议**: 使用协议规范内的合理测试数据
 
+### 5. 工厂编码消息头依赖问题
+**问题**: `T8202` 示例中使用 `factory.encodeMessage()` 时出现空指针异常，因为消息头未初始化
+**解决方案**: 在示例中只演示消息体编码，避免依赖完整消息头
+**教训**: 工厂的 `encodeMessage()` 需要完整的消息对象（包括消息头），示例代码应明确这一点
+
+### 6. WORD/DWORD 数据类型处理
+**经验**: `T8202` 实现中正确处理了 WORD(2字节) 和 DWORD(4字节) 数据类型
+**方法**: 使用 `appendUnsignedShort()` 处理 WORD，`appendUnsignedInt()` 处理 DWORD
+**注意**: 边界值测试要覆盖数据类型的最大值（WORD: 65535, DWORD: 4294967295）
+
 ## 编码规范约束
 
 ### 1. 包命名规范
