@@ -1,6 +1,7 @@
 package com.jt808.protocol.message;
 
-import com.jt808.protocol.message.T8103TerminalParameterSetting.ParameterItem;
+import com.jt808.protocol.message.ParameterItem;
+import com.jt808.protocol.message.ParameterDefinitions;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -277,23 +278,23 @@ class T8103TerminalParameterSettingTest {
     void testParameterDescriptions() {
         // 测试已定义参数的描述
         assertEquals("终端心跳发送间隔(s)", 
-                T8103TerminalParameterSetting.ParameterDefinitions.getParameterDescription(0x0001L));
+                ParameterDefinitions.getParameterDescription(0x0001L));
         assertEquals("主服务器地址", 
-                T8103TerminalParameterSetting.ParameterDefinitions.getParameterDescription(0x0013L));
+                ParameterDefinitions.getParameterDescription(0x0013L));
         assertEquals("电子围栏半径(m)", 
-                T8103TerminalParameterSetting.ParameterDefinitions.getParameterDescription(0x0031L));
+                ParameterDefinitions.getParameterDescription(0x0031L));
         
         // 测试CAN总线ID范围参数
         assertEquals("CAN总线ID单独采集设置(0x0150)", 
-                T8103TerminalParameterSetting.ParameterDefinitions.getParameterDescription(0x0150L));
+                ParameterDefinitions.getParameterDescription(0x0150L));
         
         // 测试用户自定义参数
         assertEquals("用户自定义参数(0xF001)", 
-                T8103TerminalParameterSetting.ParameterDefinitions.getParameterDescription(0xF001L));
+                ParameterDefinitions.getParameterDescription(0xF001L));
         
         // 测试未知参数
         assertEquals("未知参数(0x9999)", 
-                T8103TerminalParameterSetting.ParameterDefinitions.getParameterDescription(0x9999L));
+                ParameterDefinitions.getParameterDescription(0x9999L));
     }
     
     @Test

@@ -186,6 +186,8 @@ public class JT808Decoder {
                 return new T0100TerminalRegister();
             case 0x0102: // 终端鉴权
                 return new T0102TerminalAuth();
+            case 0x0104: // 查询终端参数应答
+                return new T0104QueryTerminalParametersResponse();
             case 0x0200: // 位置信息汇报
                 return new T0200LocationReport();
             case 0x8001: // 平台通用应答
