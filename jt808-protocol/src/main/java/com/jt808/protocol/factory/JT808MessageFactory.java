@@ -2,6 +2,7 @@ package com.jt808.protocol.factory;
 
 import com.jt808.protocol.message.JT808Message;
 import com.jt808.protocol.message.*;
+import com.jt808.protocol.message.T0108TerminalUpgradeResultNotification;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
 import com.jt808.common.exception.ProtocolException;
@@ -47,6 +48,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x0102, T0102TerminalAuth::new);
         messageCreators.put(0x0104, T0104QueryTerminalParametersResponse::new);
         messageCreators.put(0x0107, T0107QueryTerminalPropertyResponse::new);
+        messageCreators.put(0x0108, T0108TerminalUpgradeResultNotification::new);
         messageCreators.put(0x0200, T0200LocationReport::new);
         
         // 平台消息
