@@ -8,6 +8,8 @@ import com.jt808.protocol.message.T0200LocationReport;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * JT808解码器测试
  */
 class JT808DecoderTest {
+    private static final Logger logger = LoggerFactory.getLogger(JT808DecoderTest.class);
     
     private JT808Decoder decoder;
     
@@ -351,25 +354,25 @@ class JT808DecoderTest {
         T0200LocationReport locationReport = (T0200LocationReport) message;
         
         // 验证位置信息字段
-        System.out.println("消息解码成功:");
-        System.out.println("消息ID: 0x" + Integer.toHexString(message.getMessageId()).toUpperCase());
-        System.out.println("终端手机号: " + message.getHeader().getPhoneNumber());
-        System.out.println("消息体长度: " + message.getHeader().getBodyLength());
-        System.out.println("报警标志位: 0x" + Integer.toHexString(locationReport.getAlarmFlag()).toUpperCase());
-        System.out.println("状态位: 0x" + Integer.toHexString(locationReport.getStatusFlag()).toUpperCase());
-        System.out.println("纬度: " + locationReport.getLatitudeDegrees() + "°");
-        System.out.println("经度: " + locationReport.getLongitudeDegrees() + "°");
-        System.out.println("高程: " + locationReport.getAltitude() + "m");
-        System.out.println("速度: " + locationReport.getSpeedKmh() + "km/h");
-        System.out.println("方向: " + locationReport.getDirection() + "°");
-        System.out.println("时间: " + locationReport.getDateTime());
+        logger.info("消息解码成功:");
+        logger.info("消息ID: 0x{}", Integer.toHexString(message.getMessageId()).toUpperCase());
+        logger.info("终端手机号: {}", message.getHeader().getPhoneNumber());
+        logger.info("消息体长度: {}", message.getHeader().getBodyLength());
+        logger.info("报警标志位: 0x{}", Integer.toHexString(locationReport.getAlarmFlag()).toUpperCase());
+        logger.info("状态位: 0x{}", Integer.toHexString(locationReport.getStatusFlag()).toUpperCase());
+        logger.info("纬度: {}°", locationReport.getLatitudeDegrees());
+        logger.info("经度: {}°", locationReport.getLongitudeDegrees());
+        logger.info("高程: {}m", locationReport.getAltitude());
+        logger.info("速度: {}km/h", locationReport.getSpeedKmh());
+        logger.info("方向: {}°", locationReport.getDirection());
+        logger.info("时间: {}", locationReport.getDateTime());
         
         // 验证基本字段不为空或默认值
         assertNotNull(locationReport.getDateTime(), "时间不应为null");
         assertTrue(locationReport.getLatitude() != 0 || locationReport.getLongitude() != 0, "经纬度不应都为0");
         
-        System.out.println("message header: " + message.getHeader().toString());
-        System.out.println("完整位置报告: " + locationReport.toString());
+        logger.info("message header: {}", message.getHeader().toString());
+        logger.info("完整位置报告: {}", locationReport.toString());
     }
 
     @Test
@@ -395,17 +398,17 @@ class JT808DecoderTest {
             originalReport.setDirection(180);
             originalReport.setDateTime(java.time.LocalDateTime.of(2023, 3, 15, 14, 30, 0)); // 2023-03-15 14:30:00
             
-            System.out.println("原始报告: " + originalReport);
+            logger.info("原始报告: {}", originalReport);
             
             // 编码
             JT808Encoder encoder = new JT808Encoder();
             Buffer encoded = encoder.encode(originalReport);
-            System.out.println("编码后: " + encoded.toString());
+            logger.info("编码后: {}", encoded.toString());
             
             // 解码
             JT808Decoder decoder = new JT808Decoder();
             JT808Message decoded = decoder.decode(encoded);
-            System.out.println("解码报告: " + decoded);
+            logger.info("解码报告: {}", decoded);
             
             // 验证解码成功
             assertNotNull(decoded);
@@ -463,7 +466,7 @@ class JT808DecoderTest {
         java.util.List<String> noAlarms = report.getActiveAlarmDescriptions();
         assertTrue(noAlarms.isEmpty(), "无报警时应该返回空列表");
         
-        System.out.println("报警标志位解析测试通过");
+        logger.info("报警标志位解析测试通过");
     }
     
     @Test
@@ -516,8 +519,8 @@ class JT808DecoderTest {
         java.util.List<String> allActiveAlarms = report.getActiveAlarmDescriptions();
         assertEquals(25, allActiveAlarms.size(), "所有报警位激活时应该有25个报警");
         
-        System.out.println("所有报警标志位测试通过，共测试了 " + alarmBits.length + " 个报警位");
-        System.out.println("激活所有报警时的描述: " + String.join(", ", allActiveAlarms));
+        logger.info("所有报警标志位测试通过，共测试了 {} 个报警位", alarmBits.length);
+        logger.info("激活所有报警时的描述: {}", String.join(", ", allActiveAlarms));
     }
 
 }

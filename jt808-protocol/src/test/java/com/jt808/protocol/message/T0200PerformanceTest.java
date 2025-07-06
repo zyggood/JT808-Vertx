@@ -4,6 +4,9 @@ import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -18,7 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 测试在高负载情况下的性能表现
  */
 class T0200PerformanceTest {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(T0200PerformanceTest.class);
+
+
     private T0200LocationReport report;
     private Buffer complexAdditionalInfo;
     
@@ -216,7 +222,7 @@ class T0200PerformanceTest {
         // 高负载性能测试
         int iterations = 100000;
         
-        System.out.println("开始高负载性能测试...");
+        logger.info("开始高负载性能测试...");
         
         long totalStartTime = System.nanoTime();
         

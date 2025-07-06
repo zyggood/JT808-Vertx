@@ -7,6 +7,8 @@ import com.jt808.protocol.message.JT808Header;
 import com.jt808.protocol.message.JT808Message;
 import com.jt808.protocol.message.T0107QueryTerminalPropertyResponse;
 import io.vertx.core.buffer.Buffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * T0107 查询终端属性应答消息示例
@@ -15,11 +17,13 @@ import io.vertx.core.buffer.Buffer;
  */
 public class T0107QueryTerminalPropertyResponseExample {
     
+    private static final Logger logger = LoggerFactory.getLogger(T0107QueryTerminalPropertyResponseExample.class);
+    
     public static void main(String[] args) {
-        System.out.println("=== T0107 查询终端属性应答消息示例 ===");
+        logger.info("=== T0107 查询终端属性应答消息示例 ===");
         
         // 示例1: 使用构造函数创建消息
-        System.out.println("\n1. 使用构造函数创建消息:");
+        logger.info("\n1. 使用构造函数创建消息:");
         T0107QueryTerminalPropertyResponse message1 = new T0107QueryTerminalPropertyResponse(
             0x1234,                    // 终端类型
             "ABCDE",                   // 制造商ID
@@ -31,34 +35,34 @@ public class T0107QueryTerminalPropertyResponseExample {
             0x01,                      // GNSS模块属性
             0x02                       // 通信模块属性
         );
-        System.out.println("消息ID: 0x" + Integer.toHexString(message1.getMessageId()).toUpperCase());
-        System.out.println("消息内容: " + message1.toString());
+        logger.info("消息ID: 0x{}", Integer.toHexString(message1.getMessageId()).toUpperCase());
+        logger.info("消息内容: {}", message1.toString());
         
         // 示例2: 使用工厂创建消息
-        System.out.println("\n2. 使用工厂创建消息:");
+        logger.info("\n2. 使用工厂创建消息:");
         JT808MessageFactory factory = JT808MessageFactory.getInstance();
         JT808Message message2 = factory.createMessage(0x0107);
-        System.out.println("工厂创建的消息类型: " + message2.getClass().getSimpleName());
+        logger.info("工厂创建的消息类型: {}", message2.getClass().getSimpleName());
         
         // 示例3: 消息体编解码
-        System.out.println("\n3. 消息体编解码测试:");
+        logger.info("\n3. 消息体编解码测试:");
         
         // 编码消息体
         Buffer encodedBody = message1.encodeBody();
-        System.out.println("编码后的消息体长度: " + encodedBody.length() + " 字节");
-        System.out.println("编码后的消息体(十六进制): " + bytesToHex(encodedBody.getBytes()));
+        logger.info("编码后的消息体长度: {} 字节", encodedBody.length());
+        logger.info("编码后的消息体(十六进制): {}", bytesToHex(encodedBody.getBytes()));
         
         // 解码消息体
         T0107QueryTerminalPropertyResponse decodedMessage = new T0107QueryTerminalPropertyResponse();
         decodedMessage.decodeBody(encodedBody);
-        System.out.println("解码后的消息: " + decodedMessage.toString());
+        logger.info("解码后的消息: {}", decodedMessage.toString());
         
         // 验证编解码一致性
         boolean isConsistent = message1.toString().equals(decodedMessage.toString());
-        System.out.println("编解码一致性验证: " + (isConsistent ? "通过" : "失败"));
+        logger.info("编解码一致性验证: {}", (isConsistent ? "通过" : "失败"));
         
         // 示例4: 完整消息处理流程
-        System.out.println("\n4. 完整消息处理流程:");
+        logger.info("\n4. 完整消息处理流程:");
         
         JT808Encoder encoder = new JT808Encoder();
         JT808Decoder decoder = new JT808Decoder();
@@ -70,23 +74,22 @@ public class T0107QueryTerminalPropertyResponseExample {
             
             // 编码完整消息
             Buffer fullMessage = encoder.encode(message1);
-            System.out.println("完整消息长度: " + fullMessage.length() + " 字节");
-            System.out.println("完整消息(十六进制): " + bytesToHex(fullMessage.getBytes()));
+            logger.info("完整消息长度: {} 字节", fullMessage.length());
+            logger.info("完整消息(十六进制): {}", bytesToHex(fullMessage.getBytes()));
             
             // 解码完整消息
             JT808Message decodedFullMessage = decoder.decode(fullMessage);
-            System.out.println("解码后的消息类型: " + decodedFullMessage.getClass().getSimpleName());
-            System.out.println("解码后的消息内容: " + decodedFullMessage.toString());
+            logger.info("解码后的消息类型: {}", decodedFullMessage.getClass().getSimpleName());
+            logger.info("解码后的消息内容: {}", decodedFullMessage.toString());
             
-            System.out.println("\n完整消息处理流程验证: 成功");
+            logger.info("\n完整消息处理流程验证: 成功");
             
         } catch (Exception e) {
-            System.err.println("完整消息处理流程验证失败: " + e.getMessage());
-            e.printStackTrace();
+            logger.error("完整消息处理流程验证失败: {}", e.getMessage(), e);
         }
         
         // 示例5: 最小消息测试
-        System.out.println("\n5. 最小消息测试:");
+        logger.info("\n5. 最小消息测试:");
         T0107QueryTerminalPropertyResponse minMessage = new T0107QueryTerminalPropertyResponse();
         minMessage.setTerminalType(0x0001);
         minMessage.setManufacturerId("A");
@@ -99,10 +102,10 @@ public class T0107QueryTerminalPropertyResponseExample {
         minMessage.setCommunicationAttribute(0x00);
         
         Buffer minEncodedBody = minMessage.encodeBody();
-        System.out.println("最小消息体长度: " + minEncodedBody.length() + " 字节");
-        System.out.println("最小消息: " + minMessage.toString());
+        logger.info("最小消息体长度: {} 字节", minEncodedBody.length());
+        logger.info("最小消息: {}", minMessage.toString());
         
-        System.out.println("\n=== T0107 消息示例完成 ===");
+        logger.info("\n=== T0107 消息示例完成 ===");
     }
     
     /**

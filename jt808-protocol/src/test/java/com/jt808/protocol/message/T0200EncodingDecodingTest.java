@@ -4,6 +4,9 @@ package com.jt808.protocol.message;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDateTime;
@@ -14,7 +17,9 @@ import java.util.Map;
  * 测试位置信息的编码和解码功能，确保数据一致性
  */
 class T0200EncodingDecodingTest {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(T0200EncodingDecodingTest.class);
+
     private T0200LocationReport originalReport;
     
     @BeforeEach
@@ -72,7 +77,7 @@ class T0200EncodingDecodingTest {
         assertTrue(decodedReport.isACCOn(), "解码后ACC应开启");
         assertTrue(decodedReport.isPositioned(), "解码后应已定位");
         
-        System.out.println("基本编解码测试通过");
+        logger.info("基本编解码测试通过");
     }
     
     @Test
@@ -143,7 +148,7 @@ class T0200EncodingDecodingTest {
         assertEquals(92, parsedInfo.get(0x30), "信号强度应一致");
         assertEquals(14, parsedInfo.get(0x31), "卫星数应一致");
         
-        System.out.println("附加信息编解码测试通过");
+        logger.info("附加信息编解码测试通过");
     }
     
     @Test
@@ -225,7 +230,7 @@ class T0200EncodingDecodingTest {
 //        assertEquals(0xABCD, (int) analogMap.get("AD0"));
 //        assertEquals(0x1234, (int) analogMap.get("AD1"));
         
-        System.out.println("复杂附加信息编解码测试通过");
+        logger.info("复杂附加信息编解码测试通过");
     }
     
     @Test
@@ -251,7 +256,7 @@ class T0200EncodingDecodingTest {
         Map<Integer, Object> parsedInfo = decodedReport.getParsedAdditionalInfo();
         assertNull(parsedInfo, "空附加信息应解析为 null");
         
-        System.out.println("空附加信息编解码测试通过");
+        logger.info("空附加信息编解码测试通过");
     }
     
     @Test
@@ -285,7 +290,7 @@ class T0200EncodingDecodingTest {
             Map<Integer, Object> parsedInfo = decodedReport.getParsedAdditionalInfo();
         }, "无效附加信息不应导致解析异常");
         
-        System.out.println("无效附加信息编解码测试通过");
+        logger.info("无效附加信息编解码测试通过");
     }
     
     @Test
@@ -320,6 +325,6 @@ class T0200EncodingDecodingTest {
         Object unknownValue = parsedInfo.get(0xFF);
         assertNotNull(unknownValue, "未知ID的附加信息值不应为空");
         
-        System.out.println("未知ID附加信息编解码测试通过");
+        logger.info("未知ID附加信息编解码测试通过");
     }
 }

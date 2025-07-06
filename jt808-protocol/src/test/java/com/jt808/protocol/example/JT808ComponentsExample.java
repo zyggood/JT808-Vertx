@@ -8,6 +8,8 @@ import com.jt808.common.exception.ProtocolException;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -16,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
  * 展示如何使用消息工厂、校验码工具和转义工具
  */
 class JT808ComponentsExample {
+    
+    private static final Logger logger = LoggerFactory.getLogger(JT808ComponentsExample.class);
     
     @Test
     @DisplayName("完整的消息处理流程示例")
@@ -31,23 +35,23 @@ class JT808ComponentsExample {
         JT808Header header = new JT808Header(0x0002, "13800138000", 1);
         heartbeat.setHeader(header);
         
-        System.out.println("1. 创建消息: " + heartbeat.getClass().getSimpleName());
+        logger.info("1. 创建消息: {}", heartbeat.getClass().getSimpleName());
         
         // 2. 编码消息
         Buffer encodedMessage = factory.encodeMessage(heartbeat);
-        System.out.println("2. 编码后消息长度: " + encodedMessage.length() + " 字节");
+        logger.info("2. 编码后消息长度: {} 字节", encodedMessage.length());
         
         // 3. 验证校验码
         ChecksumUtils.ChecksumResult checksumResult = ChecksumUtils.verifyCompleteMessage(encodedMessage);
         assertTrue(checksumResult.isValid());
-        System.out.println("3. 校验码验证: " + checksumResult.getMessage());
-        System.out.println("   实际校验码: 0x" + String.format("%02X", checksumResult.getActualChecksum() & 0xFF));
-        System.out.println("   期望校验码: 0x" + String.format("%02X", checksumResult.getExpectedChecksum() & 0xFF));
+        logger.info("3. 校验码验证: {}", checksumResult.getMessage());
+        logger.info("   实际校验码: 0x{}", String.format("%02X", checksumResult.getActualChecksum() & 0xFF));
+        logger.info("   期望校验码: 0x{}", String.format("%02X", checksumResult.getExpectedChecksum() & 0xFF));
         
         // 4. 解析消息
         JT808Message parsedMessage = factory.parseMessage(encodedMessage);
         assertEquals(heartbeat.getMessageId(), parsedMessage.getMessageId());
-        System.out.println("4. 解析消息成功: " + parsedMessage.getClass().getSimpleName());
+        logger.info("4. 解析消息成功: {}", parsedMessage.getClass().getSimpleName());
     }
     
     @Test
@@ -58,37 +62,37 @@ class JT808ComponentsExample {
             0x01, 0x7E, 0x02, 0x7D, 0x03, 0x7E, 0x7D, 0x04
         });
         
-        System.out.println("原始数据: " + bytesToHex(originalData.getBytes()));
+        logger.info("原始数据: {}", bytesToHex(originalData.getBytes()));
         
         // 1. 检查是否需要转义
         boolean needsEscape = EscapeUtils.needsEscape(originalData);
         assertTrue(needsEscape);
-        System.out.println("1. 需要转义: " + needsEscape);
+        logger.info("1. 需要转义: {}", needsEscape);
         
         // 2. 统计需要转义的字节数
         int escapeCount = EscapeUtils.countEscapeBytes(originalData);
         assertEquals(4, escapeCount);
-        System.out.println("2. 需要转义的字节数: " + escapeCount);
+        logger.info("2. 需要转义的字节数: {}", escapeCount);
         
         // 3. 计算转义后的长度
         int escapedLength = EscapeUtils.calculateEscapedLength(originalData.length(), escapeCount);
-        System.out.println("3. 转义后预期长度: " + escapedLength);
+        logger.info("3. 转义后预期长度: {}", escapedLength);
         
         // 4. 执行转义
         Buffer escapedData = EscapeUtils.escape(originalData);
         assertEquals(escapedLength, escapedData.length());
-        System.out.println("4. 转义后数据: " + bytesToHex(escapedData.getBytes()));
+        logger.info("4. 转义后数据: {}", bytesToHex(escapedData.getBytes()));
         
         // 5. 验证转义数据
         EscapeUtils.EscapeValidationResult validation = EscapeUtils.validateEscapedData(escapedData);
         assertTrue(validation.isValid());
-        System.out.println("5. 转义数据验证: " + validation.getMessage());
+        logger.info("5. 转义数据验证: {}", validation.getMessage());
         
         // 6. 反转义
         Buffer unescapedData = EscapeUtils.unescape(escapedData);
         assertArrayEquals(originalData.getBytes(), unescapedData.getBytes());
-        System.out.println("6. 反转义后数据: " + bytesToHex(unescapedData.getBytes()));
-        System.out.println("7. 转义/反转义对称性验证: 通过");
+        logger.info("6. 反转义后数据: {}", bytesToHex(unescapedData.getBytes()));
+        logger.info("7. 转义/反转义对称性验证: 通过");
     }
     
     @Test
@@ -102,26 +106,26 @@ class JT808ComponentsExample {
             (byte) 0x00, (byte) 0x01   // 消息流水号
         };
         
-        System.out.println("消息数据: " + bytesToHex(messageData));
+        logger.info("消息数据: {}", bytesToHex(messageData));
         
         // 1. 计算校验码
         byte checksum = ChecksumUtils.calculateChecksum(messageData);
-        System.out.println("1. 计算的校验码: 0x" + String.format("%02X", checksum & 0xFF));
+        logger.info("1. 计算的校验码: 0x{}", String.format("%02X", checksum & 0xFF));
         
         // 2. 验证校验码
         boolean isValid = ChecksumUtils.verifyChecksum(messageData, checksum);
         assertTrue(isValid);
-        System.out.println("2. 校验码验证: " + (isValid ? "通过" : "失败"));
+        logger.info("2. 校验码验证: {}", (isValid ? "通过" : "失败"));
         
         // 3. 使用Buffer计算校验码
         Buffer buffer = Buffer.buffer(messageData);
         byte bufferChecksum = ChecksumUtils.calculateChecksum(buffer);
         assertEquals(checksum, bufferChecksum);
-        System.out.println("3. Buffer校验码: 0x" + String.format("%02X", bufferChecksum & 0xFF));
+        logger.info("3. Buffer校验码: 0x{}", String.format("%02X", bufferChecksum & 0xFF));
         
         // 4. 部分数据校验码计算
         byte partialChecksum = ChecksumUtils.calculateChecksum(messageData, 2, 4);
-        System.out.println("4. 部分数据校验码: 0x" + String.format("%02X", partialChecksum & 0xFF));
+        logger.info("4. 部分数据校验码: 0x{}", String.format("%02X", partialChecksum & 0xFF));
         
         // 5. 创建完整消息并验证
         Buffer completeMessage = Buffer.buffer();
@@ -132,7 +136,7 @@ class JT808ComponentsExample {
         
         ChecksumUtils.ChecksumResult result = ChecksumUtils.verifyCompleteMessage(completeMessage);
         assertTrue(result.isValid());
-        System.out.println("5. 完整消息校验: " + result);
+        logger.info("5. 完整消息校验: {}", result);
     }
     
     @Test
@@ -145,18 +149,18 @@ class JT808ComponentsExample {
         
         // 2. 检查是否支持
         assertTrue(factory.isSupported(0x9001));
-        System.out.println("1. 自定义消息类型 0x9001 注册成功");
+        logger.info("1. 自定义消息类型 0x9001 注册成功");
         
         // 3. 创建自定义消息
         JT808Message customMessage = factory.createMessage(0x9001);
         assertInstanceOf(CustomTestMessage.class, customMessage);
         assertEquals(0x9001, customMessage.getMessageId());
-        System.out.println("2. 创建自定义消息: " + customMessage.getClass().getSimpleName());
+        logger.info("2. 创建自定义消息: {}", customMessage.getClass().getSimpleName());
         
         // 4. 获取所有支持的消息ID
         var supportedIds = factory.getSupportedMessageIds();
         assertTrue(supportedIds.contains(0x9001));
-        System.out.println("3. 支持的消息类型数量: " + supportedIds.size());
+        logger.info("3. 支持的消息类型数量: {}", supportedIds.size());
     }
     
     @Test
@@ -166,7 +170,7 @@ class JT808ComponentsExample {
         Buffer invalidEscapedData = Buffer.buffer(new byte[]{0x01, 0x7E, 0x02}); // 包含未转义的0x7E
         EscapeUtils.EscapeValidationResult escapeResult = EscapeUtils.validateEscapedData(invalidEscapedData);
         assertFalse(escapeResult.isValid());
-        System.out.println("1. 无效转义数据检测: " + escapeResult.getMessage());
+        logger.info("1. 无效转义数据检测: {}", escapeResult.getMessage());
         
         // 2. 校验码错误的消息
         Buffer invalidMessage = Buffer.buffer();
@@ -177,13 +181,13 @@ class JT808ComponentsExample {
         
         ChecksumUtils.ChecksumResult checksumResult = ChecksumUtils.verifyCompleteMessage(invalidMessage);
         assertFalse(checksumResult.isValid());
-        System.out.println("2. 校验码错误检测: " + checksumResult.getMessage());
+        logger.info("2. 校验码错误检测: {}", checksumResult.getMessage());
         
         // 3. 消息长度不足
         Buffer shortMessage = Buffer.buffer(new byte[]{0x7E, 0x01, 0x7E});
         ChecksumUtils.ChecksumResult shortResult = ChecksumUtils.verifyCompleteMessage(shortMessage);
         assertFalse(shortResult.isValid());
-        System.out.println("3. 消息长度不足检测: " + shortResult.getMessage());
+        logger.info("3. 消息长度不足检测: {}", shortResult.getMessage());
     }
     
     /**

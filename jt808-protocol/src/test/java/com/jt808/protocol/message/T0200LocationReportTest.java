@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
 import io.vertx.core.buffer.Buffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -13,7 +16,10 @@ import java.util.Map;
  * 测试报警标志位、状态位、附加信息解析等功能
  */
 class T0200LocationReportTest {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(T0200LocationReportTest.class);
+
+
     private T0200LocationReport report;
     
     @BeforeEach
@@ -302,8 +308,8 @@ class T0200LocationReportTest {
 //        assertTrue(toStringResult.contains("油量"), "应该包含油量信息");
 //        assertTrue(toStringResult.contains("50.0 L"), "应该包含格式化的油量值");
 
-        System.out.println("Enhanced toString output:");
-        System.out.println(toStringResult);
+        logger.info("Enhanced toString output:");
+        logger.info(toStringResult);
     }
     
     @Test

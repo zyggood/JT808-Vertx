@@ -1,8 +1,8 @@
 package com.jt808.protocol.message;
 
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * T8300文本信息下发消息功能演示

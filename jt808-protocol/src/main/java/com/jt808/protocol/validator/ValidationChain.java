@@ -5,8 +5,8 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
  * 管理和执行多个消息验证器
  */
 public class ValidationChain {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(ValidationChain.class);
     
     private final Vertx vertx;
@@ -132,9 +132,9 @@ public class ValidationChain {
                         );
                     }
                 })
-                .collect(Collectors.toList());
+                .toList();
         
-        return CompositeFuture.all(new ArrayList<>(futures))
+        return Future.all(new ArrayList<>(futures))
                 .map(compositeFuture -> {
                     List<MessageValidator.ValidationResult> results = compositeFuture.list();
                     return createChainResult(results);

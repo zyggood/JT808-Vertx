@@ -3,13 +3,18 @@ package com.jt808.protocol.message;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import com.jt808.protocol.message.T0200LocationReport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 /**
  * 报警标志位解析测试
  */
 class AlarmFlagTest {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(AlarmFlagTest.class);
+
     @Test
     void testAlarmFlagParsing() {
         // 测试报警标志位解析功能
@@ -56,7 +61,7 @@ class AlarmFlagTest {
         java.util.List<String> noAlarms = report.getActiveAlarmDescriptions();
         assertTrue(noAlarms.isEmpty(), "无报警时应该返回空列表");
         
-        System.out.println("报警标志位解析测试通过");
+        logger.info("报警标志位解析测试通过");
     }
     
     @Test
@@ -109,8 +114,8 @@ class AlarmFlagTest {
         java.util.List<String> allActiveAlarms = report.getActiveAlarmDescriptions();
         assertEquals(25, allActiveAlarms.size(), "所有报警位激活时应该有25个报警");
         
-        System.out.println("所有报警标志位测试通过，共测试了 " + alarmBits.length + " 个报警位");
-        System.out.println("激活所有报警时的描述: " + String.join(", ", allActiveAlarms));
+        logger.info("所有报警标志位测试通过，共测试了 " + alarmBits.length + " 个报警位");
+        logger.info("激活所有报警时的描述: " + String.join(", ", allActiveAlarms));
     }
     
     @Test
@@ -160,7 +165,7 @@ class AlarmFlagTest {
         report.setAlarmFlag(0x80000000); // 非法开门报警
         assertTrue(report.hasIllegalDoorOpenAlarm(), "应该检测到非法开门报警");
         
-        System.out.println("特定报警方法测试通过");
+        logger.info("特定报警方法测试通过");
     }
     
     @Test
@@ -188,7 +193,7 @@ class AlarmFlagTest {
         assertTrue(alarms.contains("碰撞预警"), "应该包含碰撞预警描述");
         assertTrue(alarms.contains("侧翻预警"), "应该包含侧翻预警描述");
         
-        System.out.println("碰撞和侧翻预警分离测试通过");
+        logger.info("碰撞和侧翻预警分离测试通过");
     }
     
     @Test
@@ -221,7 +226,7 @@ class AlarmFlagTest {
         assertTrue(alarms.contains("超速预警"), "应该包含超速预警描述");
         assertTrue(alarms.contains("疲劳驾驶预警"), "应该包含疲劳驾驶预警描述");
         
-        System.out.println("新增报警类型测试通过");
+        logger.info("新增报警类型测试通过");
     }
     
     @Test
@@ -234,7 +239,7 @@ class AlarmFlagTest {
         assertTrue(withAlarmStr.contains("紧急报警"), "有报警时toString应包含报警描述");
         assertTrue(withAlarmStr.contains("超速报警"), "有报警时toString应包含报警描述");
         
-        System.out.println("toString测试通过");
-        System.out.println("有报警: " + withAlarmStr);
+        logger.info("toString测试通过");
+        logger.info("有报警: " + withAlarmStr);
     }
 }

@@ -5,6 +5,8 @@ import com.jt808.protocol.message.ParameterDefinitions;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -14,7 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * T8103设置终端参数消息测试
  */
 class T8103TerminalParameterSettingTest {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(T8103TerminalParameterSettingTest.class);
+
+
     private T8103TerminalParameterSetting message;
     
     @BeforeEach
@@ -375,7 +380,7 @@ class T8103TerminalParameterSettingTest {
         
         ParameterItem stringItem = ParameterItem.createStringParameter(0x0013L, "test");
         String stringStr = stringItem.toString();
-        System.out.println("Actual string output: " + stringStr);
+        logger.info("Actual string output: " + stringStr);
         assertTrue(stringStr.contains("0x0013"));
         assertTrue(stringStr.contains("length=4"));
         assertTrue(stringStr.contains("value=1952805748"));

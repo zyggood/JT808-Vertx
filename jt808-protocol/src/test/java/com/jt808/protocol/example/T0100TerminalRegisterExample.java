@@ -9,22 +9,26 @@ import com.jt808.protocol.util.EscapeUtils;
 import com.jt808.common.exception.ProtocolException;
 import io.vertx.core.buffer.Buffer;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * T0100终端注册消息使用示例
  */
 public class T0100TerminalRegisterExample {
     
+    private static final Logger logger = LoggerFactory.getLogger(T0100TerminalRegisterExample.class);
+    
     @Test
     public void demonstrateT0100Usage() throws ProtocolException {
-        System.out.println("=== T0100终端注册消息使用示例 ===");
+        logger.info("=== T0100终端注册消息使用示例 ===");
         
         // 1. 使用工厂创建消息
         JT808MessageFactory factory = JT808MessageFactory.getInstance();
         JT808Message message = factory.createMessage(0x0100);
         
-        System.out.println("1. 工厂创建的消息类型: " + message.getClass().getSimpleName());
-        System.out.println("   消息ID: 0x" + Integer.toHexString(message.getMessageId()).toUpperCase());
+        logger.info("1. 工厂创建的消息类型: {}", message.getClass().getSimpleName());
+        logger.info("   消息ID: 0x{}", Integer.toHexString(message.getMessageId()).toUpperCase());
         
         // 2. 直接创建T0100消息并设置数据
         T0100TerminalRegister register = new T0100TerminalRegister();
@@ -42,91 +46,93 @@ public class T0100TerminalRegisterExample {
         register.setPlateColor((byte) 1); // 蓝色车牌
         register.setPlateNumber("京A12345"); // 车牌号
         
-        System.out.println("\n2. 终端注册信息:");
-        System.out.println("   省域ID: " + register.getProvinceId() + " (北京)");
-        System.out.println("   市县域ID: " + register.getCityId());
-        System.out.println("   制造商ID: " + register.getManufacturerId());
-        System.out.println("   终端型号: " + register.getTerminalModel());
-        System.out.println("   终端ID: " + register.getTerminalId());
-        System.out.println("   车牌颜色: " + register.getPlateColor() + " (" + register.getPlateColorDescription() + ")");
-        System.out.println("   车牌号码: " + register.getPlateNumber());
+        logger.info("\n2. 终端注册信息:");
+        logger.info("   省域ID: {} (北京)", register.getProvinceId());
+        logger.info("   市县域ID: {}", register.getCityId());
+        logger.info("   制造商ID: {}", register.getManufacturerId());
+        logger.info("   终端型号: {}", register.getTerminalModel());
+        logger.info("   终端ID: {}", register.getTerminalId());
+        logger.info("   车牌颜色: {} ({})", register.getPlateColor(), register.getPlateColorDescription());
+        logger.info("   车牌号码: {}", register.getPlateNumber());
         
         // 3. 设置消息头
         JT808Header header = new JT808Header(0x0100, "13800138000", 1001);
         register.setHeader(header);
         
-        System.out.println("\n3. 消息头信息:");
-        System.out.println("   终端手机号: " + header.getPhoneNumber());
-        System.out.println("   消息流水号: " + header.getSerialNumber());
+        logger.info("\n3. 消息头信息:");
+        logger.info("   终端手机号: {}", header.getPhoneNumber());
+        logger.info("   消息流水号: {}", header.getSerialNumber());
         
         // 4. 编码消息体
         Buffer encodedBody = register.encodeBody();
-        System.out.println("\n4. 编码后的消息体:");
-        System.out.println("   消息体长度: " + encodedBody.length() + " 字节");
-        System.out.print("   消息体内容: ");
+        logger.info("\n4. 编码后的消息体:");
+        logger.info("   消息体长度: {} 字节", encodedBody.length());
+        StringBuilder bodyContent = new StringBuilder("   消息体内容: ");
         for (int i = 0; i < encodedBody.length(); i++) {
-            System.out.printf("%02X ", encodedBody.getByte(i) & 0xFF);
+            bodyContent.append(String.format("%02X ", encodedBody.getByte(i) & 0xFF));
             if ((i + 1) % 16 == 0) {
-                System.out.println();
-                System.out.print("                ");
+                logger.info(bodyContent.toString());
+                bodyContent = new StringBuilder("                ");
             }
         }
-        System.out.println();
+        if (bodyContent.length() > 16) {
+            logger.info(bodyContent.toString());
+        }
         
         // 5. 解析消息体字段
-        System.out.println("\n5. 消息体字段解析:");
+        logger.info("\n5. 消息体字段解析:");
         analyzeMessageBody(encodedBody);
         
         // 6. 解码验证
         T0100TerminalRegister decoded = new T0100TerminalRegister();
         decoded.decodeBody(encodedBody);
         
-        System.out.println("\n6. 解码验证:");
-        System.out.println("   编码解码一致性: " + isDataConsistent(register, decoded));
+        logger.info("\n6. 解码验证:");
+        logger.info("   编码解码一致性: {}", isDataConsistent(register, decoded));
         
         // 7. 使用工厂编码完整消息
         Buffer completeMessage = factory.encodeMessage(register);
         
-        System.out.println("\n7. 完整消息编码:");
-        System.out.println("   完整消息长度: " + completeMessage.length() + " 字节");
-        System.out.print("   完整消息: ");
+        logger.info("\n7. 完整消息编码:");
+        logger.info("   完整消息长度: {} 字节", completeMessage.length());
+        StringBuilder completeContent = new StringBuilder("   完整消息: ");
         for (int i = 0; i < Math.min(completeMessage.length(), 30); i++) {
-            System.out.printf("%02X ", completeMessage.getByte(i) & 0xFF);
+            completeContent.append(String.format("%02X ", completeMessage.getByte(i) & 0xFF));
         }
         if (completeMessage.length() > 30) {
-            System.out.print("...");
+            completeContent.append("...");
         }
-        System.out.println();
+        logger.info(completeContent.toString());
         
         // 8. 校验码验证
         ChecksumUtils.ChecksumResult checksumResult = ChecksumUtils.verifyCompleteMessage(completeMessage);
-        System.out.println("\n8. 校验码验证: " + checksumResult.getMessage());
+        logger.info("\n8. 校验码验证: {}", checksumResult.getMessage());
         
         // 9. 转义处理
         boolean needsEscape = EscapeUtils.needsEscape(completeMessage);
-        System.out.println("\n9. 转义处理:");
-        System.out.println("   是否需要转义: " + needsEscape);
+        logger.info("\n9. 转义处理:");
+        logger.info("   是否需要转义: {}", needsEscape);
         
         if (needsEscape) {
             Buffer escaped = EscapeUtils.escape(completeMessage);
-            System.out.println("   转义后长度: " + escaped.length() + " 字节");
+            logger.info("   转义后长度: {} 字节", escaped.length());
         }
         
         // 10. 工厂解析消息
         JT808Message parsed = factory.parseMessage(completeMessage);
-        System.out.println("\n10. 工厂解析结果:");
-        System.out.println("    解析的消息类型: " + parsed.getClass().getSimpleName());
-        System.out.println("    消息ID匹配: " + (parsed.getMessageId() == 0x0100));
+        logger.info("\n10. 工厂解析结果:");
+        logger.info("    解析的消息类型: {}", parsed.getClass().getSimpleName());
+        logger.info("    消息ID匹配: {}", (parsed.getMessageId() == 0x0100));
         
         if (parsed instanceof T0100TerminalRegister) {
             T0100TerminalRegister parsedRegister = (T0100TerminalRegister) parsed;
-            System.out.println("    解析的制造商ID: " + parsedRegister.getManufacturerId());
-            System.out.println("    解析的终端型号: " + parsedRegister.getTerminalModel());
-            System.out.println("    解析的车牌号: " + parsedRegister.getPlateNumber());
+            logger.info("    解析的制造商ID: {}", parsedRegister.getManufacturerId());
+            logger.info("    解析的终端型号: {}", parsedRegister.getTerminalModel());
+            logger.info("    解析的车牌号: {}", parsedRegister.getPlateNumber());
         }
         
         // 11. 实际应用场景
-        System.out.println("\n11. 实际应用场景:");
+        logger.info("\n11. 实际应用场景:");
         demonstrateRealWorldScenarios();
     }
     
@@ -138,42 +144,42 @@ public class T0100TerminalRegisterExample {
         
         // 省域ID (2字节)
         int provinceId = body.getUnsignedShort(index);
-        System.out.println("   省域ID: " + provinceId + " (偏移: " + index + ", 长度: 2字节)");
+        logger.info("   省域ID: {} (偏移: {}, 长度: 2字节)", provinceId, index);
         index += 2;
         
         // 市县域ID (2字节)
         int cityId = body.getUnsignedShort(index);
-        System.out.println("   市县域ID: " + cityId + " (偏移: " + index + ", 长度: 2字节)");
+        logger.info("   市县域ID: {} (偏移: {}, 长度: 2字节)", cityId, index);
         index += 2;
         
         // 制造商ID (5字节)
         byte[] manufacturerBytes = body.getBytes(index, index + 5);
         String manufacturerId = new String(manufacturerBytes).trim().replace("\0", "");
-        System.out.println("   制造商ID: '" + manufacturerId + "' (偏移: " + index + ", 长度: 5字节)");
+        logger.info("   制造商ID: '{}' (偏移: {}, 长度: 5字节)", manufacturerId, index);
         index += 5;
         
         // 终端型号 (20字节)
         byte[] modelBytes = body.getBytes(index, index + 20);
         String terminalModel = new String(modelBytes).trim().replace("\0", "");
-        System.out.println("   终端型号: '" + terminalModel + "' (偏移: " + index + ", 长度: 20字节)");
+        logger.info("   终端型号: '{}' (偏移: {}, 长度: 20字节)", terminalModel, index);
         index += 20;
         
         // 终端ID (7字节)
         byte[] terminalIdBytes = body.getBytes(index, index + 7);
         String terminalId = new String(terminalIdBytes).trim().replace("\0", "");
-        System.out.println("   终端ID: '" + terminalId + "' (偏移: " + index + ", 长度: 7字节)");
+        logger.info("   终端ID: '{}' (偏移: {}, 长度: 7字节)", terminalId, index);
         index += 7;
         
         // 车牌颜色 (1字节)
         byte plateColor = body.getByte(index);
-        System.out.println("   车牌颜色: " + (plateColor & 0xFF) + " (偏移: " + index + ", 长度: 1字节)");
+        logger.info("   车牌颜色: {} (偏移: {}, 长度: 1字节)", (plateColor & 0xFF), index);
         index += 1;
         
         // 车辆标识 (剩余字节)
         if (index < body.length()) {
             byte[] plateBytes = body.getBytes(index, body.length());
             String plateNumber = new String(plateBytes);
-            System.out.println("   车辆标识: '" + plateNumber + "' (偏移: " + index + ", 长度: " + plateBytes.length + "字节)");
+            logger.info("   车辆标识: '{}' (偏移: {}, 长度: {}字节)", plateNumber, index, plateBytes.length);
         }
     }
     
@@ -194,13 +200,13 @@ public class T0100TerminalRegisterExample {
      * 演示实际应用场景
      */
     private void demonstrateRealWorldScenarios() {
-        System.out.println("    场景1: 新车辆终端首次注册");
+        logger.info("    场景1: 新车辆终端首次注册");
         demonstrateNewVehicleRegistration();
         
-        System.out.println("\n    场景2: 未上牌车辆注册(使用VIN码)");
+        logger.info("\n    场景2: 未上牌车辆注册(使用VIN码)");
         demonstrateUnplatedVehicleRegistration();
         
-        System.out.println("\n    场景3: 不同车牌颜色的车辆注册");
+        logger.info("\n    场景3: 不同车牌颜色的车辆注册");
         demonstrateDifferentPlateColors();
     }
     
@@ -222,10 +228,10 @@ public class T0100TerminalRegisterExample {
         JT808Header header = new JT808Header(0x0100, "13900139000", 1);
         register.setHeader(header);
         
-        System.out.println("      终端手机号: " + header.getPhoneNumber());
-        System.out.println("      注册地区: 广东深圳");
-        System.out.println("      制造商: " + register.getManufacturerId());
-        System.out.println("      车牌: " + register.getPlateColorDescription() + "牌 " + register.getPlateNumber());
+        logger.info("      终端手机号: {}", header.getPhoneNumber());
+        logger.info("      注册地区: 广东深圳");
+        logger.info("      制造商: {}", register.getManufacturerId());
+        logger.info("      车牌: {}牌 {}", register.getPlateColorDescription(), register.getPlateNumber());
     }
     
     /**
@@ -246,11 +252,11 @@ public class T0100TerminalRegisterExample {
         JT808Header header = new JT808Header(0x0100, "13700137000", 1);
         register.setHeader(header);
         
-        System.out.println("      终端手机号: " + header.getPhoneNumber());
-        System.out.println("      注册地区: 上海");
-        System.out.println("      制造商: " + register.getManufacturerId());
-        System.out.println("      车辆状态: 未上牌");
-        System.out.println("      VIN码: " + register.getPlateNumber());
+        logger.info("      终端手机号: {}", header.getPhoneNumber());
+        logger.info("      注册地区: 上海");
+        logger.info("      制造商: {}", register.getManufacturerId());
+        logger.info("      车辆状态: 未上牌");
+        logger.info("      VIN码: {}", register.getPlateNumber());
     }
     
     /**
@@ -267,7 +273,7 @@ public class T0100TerminalRegisterExample {
         yellowPlate.setPlateColor((byte) 2); // 黄色
         yellowPlate.setPlateNumber("鲁A12345");
         
-        System.out.println("      黄牌货车: " + yellowPlate.getPlateColorDescription() + "牌 " + yellowPlate.getPlateNumber());
+        logger.info("      黄牌货车: {}牌 {}", yellowPlate.getPlateColorDescription(), yellowPlate.getPlateNumber());
         
         // 绿牌新能源车
         T0100TerminalRegister greenPlate = new T0100TerminalRegister();
@@ -279,6 +285,6 @@ public class T0100TerminalRegisterExample {
         greenPlate.setPlateColor((byte) 9); // 其他(绿牌)
         greenPlate.setPlateNumber("苏AD12345");
         
-        System.out.println("      新能源车: " + greenPlate.getPlateColorDescription() + "牌 " + greenPlate.getPlateNumber());
+        logger.info("      新能源车: {}牌 {}", greenPlate.getPlateColorDescription(), greenPlate.getPlateNumber());
     }
 }

@@ -2,6 +2,9 @@ package com.jt808.protocol.message;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -9,7 +12,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * 测试T0200LocationReport中的32位状态标志位解析功能
  */
 class StatusFlagTest {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(StatusFlagTest.class);
+
     private T0200LocationReport report;
     
     @BeforeEach
@@ -269,8 +274,8 @@ class StatusFlagTest {
         assertTrue(toStringResult.contains("载重状态: 空车"), "应该包含载重状态");
         assertTrue(toStringResult.contains("GPS: 是"), "应该包含GPS状态");
         
-        System.out.println("状态位toString测试:");
-        System.out.println(toStringResult);
+        logger.info("状态位toString测试:");
+        logger.info(toStringResult);
     }
     
     @Test

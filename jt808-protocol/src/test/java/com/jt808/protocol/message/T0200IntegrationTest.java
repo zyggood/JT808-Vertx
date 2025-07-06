@@ -7,12 +7,16 @@ import io.vertx.core.buffer.Buffer;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * T0200位置信息汇报集成测试
  * 测试完整的消息处理流程和数据一致性
  */
 class T0200IntegrationTest {
+    
+    private static final Logger logger = LoggerFactory.getLogger(T0200IntegrationTest.class);
     
     private T0200LocationReport report;
     
@@ -176,9 +180,9 @@ class T0200IntegrationTest {
         assertTrue(toStringResult.contains("80.0 L"));
         assertTrue(toStringResult.contains("近光灯: 开启"));
         
-        System.out.println("完整场景测试通过");
-        System.out.println("toString输出:");
-        System.out.println(toStringResult);
+        logger.info("完整场景测试通过");
+        logger.info("toString输出:");
+        logger.info(toStringResult);
     }
     
     @Test
@@ -227,8 +231,8 @@ class T0200IntegrationTest {
         assertFalse(report.isACCOn(), "ACC应该关闭");
         assertFalse(report.isDoorLocked(), "车门不应该加锁");
         
-        System.out.println("紧急场景测试通过");
-        System.out.println("紧急报警: " + String.join(", ", alarms));
+        logger.info("紧急场景测试通过");
+        logger.info("紧急报警: {}", String.join(", ", alarms));
     }
     
     @Test
@@ -304,7 +308,7 @@ class T0200IntegrationTest {
         assertEquals(88, parsedInfo.get(0x30), "信号强度应该正确");
         assertEquals(16, parsedInfo.get(0x31), "卫星数应该正确");
         
-        System.out.println("正常行驶场景测试通过");
+        logger.info("正常行驶场景测试通过");
     }
     
     @Test
@@ -343,7 +347,7 @@ class T0200IntegrationTest {
         
         assertEquals(0, report.getSpeed(), "停车时速度应该为0");
         
-        System.out.println("停车场景测试通过");
+        logger.info("停车场景测试通过");
     }
     
     @Test
@@ -388,7 +392,7 @@ class T0200IntegrationTest {
         assertEquals(originalAlarm, report.getAlarmFlag(), "toString后报警标志位不应该改变");
         assertEquals(originalStatus, report.getStatusFlag(), "toString后状态标志位不应该改变");
         
-        System.out.println("数据一致性测试通过");
+        logger.info("数据一致性测试通过");
     }
     
     @Test
@@ -423,7 +427,7 @@ class T0200IntegrationTest {
             assertNotNull(result);
         }, "边界值不应该导致异常");
         
-        System.out.println("边界值测试通过");
+        logger.info("边界值测试通过");
     }
     
     @Test
@@ -477,6 +481,6 @@ class T0200IntegrationTest {
         
         assertTrue(duration < 5000, "1000次操作应该在5秒内完成，实际耗时: " + duration + "ms");
         
-        System.out.println("性能测试通过，1000次操作耗时: " + duration + "ms");
+        logger.info("性能测试通过，1000次操作耗时: {}ms", duration);
     }
 }

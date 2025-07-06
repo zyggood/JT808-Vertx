@@ -4,6 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
 import io.vertx.core.buffer.Buffer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 /**
@@ -11,6 +14,8 @@ import java.util.Map;
  * 测试T0200LocationReport中的附加信息解析功能
  */
 class AdditionalInfoTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(AdditionalInfoTest.class);
     
     private T0200LocationReport report;
     
@@ -396,8 +401,8 @@ class AdditionalInfoTest {
         assertTrue(toStringResult.contains("近光灯: 开启"), "应该包含近光灯状态");
         assertTrue(toStringResult.contains("远光灯: 开启"), "应该包含远光灯状态");
         
-        System.out.println("附加信息toString测试:");
-        System.out.println(toStringResult);
+        logger.info("附加信息toString测试:");
+        logger.info(toStringResult);
     }
     
     @Test
