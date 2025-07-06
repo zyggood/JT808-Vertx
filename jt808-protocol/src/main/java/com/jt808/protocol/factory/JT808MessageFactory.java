@@ -55,6 +55,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8104, T8104QueryTerminalParameters::new);
         messageCreators.put(0x8105, T8105TerminalControl::new);
         messageCreators.put(0x8106, T8106QuerySpecificTerminalParameters::new);
+        messageCreators.put(0x8107, T8107QueryTerminalProperty::new);
     }
     
     /**
