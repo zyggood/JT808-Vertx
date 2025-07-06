@@ -1,7 +1,5 @@
 package com.jt808.protocol.example;
 
-import com.jt808.protocol.factory.JT808MessageFactory;
-import com.jt808.protocol.message.JT808Message;
 import com.jt808.protocol.message.T8203ManualAlarmConfirmation;
 import io.vertx.core.buffer.Buffer;
 import org.slf4j.Logger;
