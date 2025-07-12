@@ -49,10 +49,12 @@ public class T0200LocationReport extends JT808Message {
     
     public T0200LocationReport() {
         super();
+        this.parsedAdditionalInfo = null; // 延迟解析：初始化为null
     }
     
     public T0200LocationReport(JT808Header header) {
         super(header);
+        this.parsedAdditionalInfo = null; // 延迟解析：初始化为null
     }
     
     @Override
@@ -165,9 +167,8 @@ public class T0200LocationReport extends JT808Message {
         // 附加信息 (剩余字节)
         if (index < body.length()) {
             additionalInfo = body.getBuffer(index, body.length());
-            // 解析附加信息项
-            byte[] additionalBytes = additionalInfo.getBytes();
-            parsedAdditionalInfo = parseAdditionalInfo(additionalBytes);
+            // 延迟解析：不在此处立即解析，等到需要时再解析
+            parsedAdditionalInfo = null;
         }
     }
     
@@ -284,9 +285,20 @@ public class T0200LocationReport extends JT808Message {
     
     public void setAdditionalInfo(Buffer additionalInfo) {
         this.additionalInfo = additionalInfo;
+        // 延迟解析：标记为未解析状态，只有在需要时才解析
+        this.parsedAdditionalInfo = null;
     }
-    
+
     public Map<Integer, Object> getParsedAdditionalInfo() {
+        // 延迟解析：只有在首次访问时才执行解析
+        if (parsedAdditionalInfo == null) {
+            if (additionalInfo != null && additionalInfo.length() > 0) {
+                parsedAdditionalInfo = parseAdditionalInfo(additionalInfo.getBytes());
+            } else {
+                // 保持向后兼容性：空附加信息返回null
+                return null;
+            }
+        }
         return parsedAdditionalInfo;
     }
     

@@ -186,6 +186,18 @@ response.setLocationReport(null);
 - 提供针对不同场景的工厂方法（紧急文本、普通文本、CAN故障码等）
 - 编解码一致性测试和边界值测试必不可少
 
+### 9. T0200 位置信息报告延迟解析优化
+**问题**: `setAdditionalInfo` 方法每次调用都会立即解析附加信息，在高频场景下成为性能瓶颈
+**解决方案**: 实现延迟解析机制，只在首次访问 `getParsedAdditionalInfo()` 时才执行解析
+**性能提升**: 编解码性能显著提升，特别是在大量位置报告处理场景下
+**实现要点**:
+- `setAdditionalInfo()` 只设置原始数据，将 `parsedAdditionalInfo` 置为 `null`
+- `getParsedAdditionalInfo()` 检查是否已解析，未解析则执行解析并缓存结果
+- 构造函数中 `parsedAdditionalInfo` 初始化为 `null` 而非空 `HashMap`
+- `decodeBody()` 方法中移除立即解析逻辑，改为延迟解析
+- 保持向后兼容性，API接口不变
+**测试验证**: 通过 `LazyParsingTest` 验证延迟解析的正确性和性能
+
 ## 编码规范约束
 
 ### 1. 包命名规范

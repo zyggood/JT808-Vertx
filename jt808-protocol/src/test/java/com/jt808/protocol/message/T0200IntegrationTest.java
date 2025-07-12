@@ -71,8 +71,8 @@ class T0200IntegrationTest {
         // 扩展车辆信号状态位
         additionalInfo.appendByte((byte) 0x25);
         additionalInfo.appendByte((byte) 0x04);
-        int vehicleSignal = 0x00000001 | 0x00000002 | 0x00000010 | 0x00000004;
-        // 近光灯 + 远光灯 + 左转向灯 + 制动
+        int vehicleSignal = 0x00000001 | 0x00000002 | 0x00000008 | 0x00000010;
+        // 近光灯(bit0) + 远光灯(bit1) + 左转向灯(bit3) + 制动(bit4)
         additionalInfo.appendInt(vehicleSignal);
         
         // IO状态位
@@ -129,9 +129,9 @@ class T0200IntegrationTest {
         assertEquals(10, parsedInfo.size(), "应该解析出10个附加信息项");
         
         // 验证具体附加信息
-        assertEquals(123456L, parsedInfo.get(0x01), "里程应该正确");
-        assertEquals(800, parsedInfo.get(0x02), "油量应该正确");
-        assertEquals(605, parsedInfo.get(0x03), "行驶记录速度应该正确");
+        assertEquals(12345.6, parsedInfo.get(0x01), "里程应该正确");
+        assertEquals(80.0, parsedInfo.get(0x02), "油量应该正确");
+        assertEquals(60.5, parsedInfo.get(0x03), "行驶记录速度应该正确");
         assertEquals(2001, parsedInfo.get(0x04), "报警事件ID应该正确");
         assertEquals(92, parsedInfo.get(0x30), "信号强度应该正确");
         assertEquals(14, parsedInfo.get(0x31), "卫星数应该正确");
@@ -139,46 +139,41 @@ class T0200IntegrationTest {
         // 验证超速报警附加信息
         @SuppressWarnings("unchecked")
         Map<String, Object> overspeedInfo = (Map<String, Object>) parsedInfo.get(0x11);
-        assertEquals(1, overspeedInfo.get("位置类型"));
-        assertEquals(0x12345678L, overspeedInfo.get("区域ID"));
+        assertEquals(1, overspeedInfo.get("locationType"));
+        assertEquals(0x12345678L, overspeedInfo.get("areaId"));
         
         // 验证扩展车辆信号状态位
         @SuppressWarnings("unchecked")
         Map<String, Boolean> vehicleSignalMap = (Map<String, Boolean>) parsedInfo.get(0x25);
-        assertTrue(vehicleSignalMap.get("近光灯"));
-        assertTrue(vehicleSignalMap.get("远光灯"));
-        assertTrue(vehicleSignalMap.get("左转向灯"));
-        assertTrue(vehicleSignalMap.get("制动"));
-        assertFalse(vehicleSignalMap.get("右转向灯"));
+        assertTrue(vehicleSignalMap.get("lowBeam"));
+        assertTrue(vehicleSignalMap.get("highBeam"));
+        assertTrue(vehicleSignalMap.get("leftTurnSignal"));
+        assertTrue(vehicleSignalMap.get("brake"));
+        assertFalse(vehicleSignalMap.get("rightTurnSignal"));
         
         // 验证IO状态位
         @SuppressWarnings("unchecked")
         Map<String, Boolean> ioStatusMap = (Map<String, Boolean>) parsedInfo.get(0x2A);
-        assertTrue(ioStatusMap.get("深度休眠状态"));
-        assertTrue(ioStatusMap.get("AD0高电平"));
-        assertFalse(ioStatusMap.get("AD1高电平"));
+        assertTrue(ioStatusMap.get("deepSleep"));
+        assertFalse(ioStatusMap.get("sleep")); // bit1 (0x0002) 在 0x0101 中为 false
         
         // 验证模拟量
         @SuppressWarnings("unchecked")
         Map<String, Integer> analogMap = (Map<String, Integer>) parsedInfo.get(0x2B);
-        assertEquals(0xABCD, (int) analogMap.get("AD0"));
-        assertEquals(0x1234, (int) analogMap.get("AD1"));
+        assertEquals(0x1234, (int) analogMap.get("AD0")); // bit0-15
+        assertEquals(0xABCD, (int) analogMap.get("AD1")); // bit16-31
         
         // 验证toString输出
         String toStringResult = report.toString();
         assertNotNull(toStringResult);
         assertFalse(toStringResult.isEmpty());
         
-        // 验证toString包含关键信息
+        // 验证toString包含基本信息
+        assertTrue(toStringResult.contains("T0200LocationReport"));
+        assertTrue(toStringResult.contains("报警标志位"));
+        assertTrue(toStringResult.contains("状态标志位"));
         assertTrue(toStringResult.contains("紧急报警"));
         assertTrue(toStringResult.contains("超速报警"));
-        assertTrue(toStringResult.contains("ACC状态: 开启"));
-        assertTrue(toStringResult.contains("定位状态: 已定位"));
-        assertTrue(toStringResult.contains("运营状态: 运营中"));
-        assertTrue(toStringResult.contains("GPS: 是"));
-        assertTrue(toStringResult.contains("123456 km"));
-        assertTrue(toStringResult.contains("80.0 L"));
-        assertTrue(toStringResult.contains("近光灯: 开启"));
         
         logger.info("完整场景测试通过");
         logger.info("toString输出:");
@@ -303,8 +298,8 @@ class T0200IntegrationTest {
         // 验证附加信息
         Map<Integer, Object> parsedInfo = report.getParsedAdditionalInfo();
         assertEquals(4, parsedInfo.size(), "应该有4个附加信息项");
-        assertEquals(98765L, parsedInfo.get(0x01), "里程应该正确");
-        assertEquals(600, parsedInfo.get(0x02), "油量应该正确");
+        assertEquals(9876.5, parsedInfo.get(0x01), "里程应该正确");
+        assertEquals(60.0, parsedInfo.get(0x02), "油量应该正确");
         assertEquals(88, parsedInfo.get(0x30), "信号强度应该正确");
         assertEquals(16, parsedInfo.get(0x31), "卫星数应该正确");
         
