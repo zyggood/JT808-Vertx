@@ -191,11 +191,11 @@ class ChecksumUtilsTest {
         byte[] complexData = {(byte) 0x00, (byte) 0xFF, 0x7E, 0x7D, (byte) 0x80};
         byte checksum = ChecksumUtils.calculateChecksum(complexData);
 
-        // 手动计算：0x00 ^ 0xFF ^ 0x7E ^ 0x7D ^ 0x80 = 0x02
-        assertEquals((byte) 0x02, checksum);
+        // 手动计算：0x00 ^ 0xFF ^ 0x7E ^ 0x7D ^ 0x80 = 0x7C
+        assertEquals((byte) 0x7C, checksum);
 
         // 验证校验码
-        assertTrue(ChecksumUtils.verifyChecksum(complexData, (byte) 0x02));
+        assertTrue(ChecksumUtils.verifyChecksum(complexData, (byte) 0x7C));
         assertFalse(ChecksumUtils.verifyChecksum(complexData, (byte) 0x03));
     }
 }
