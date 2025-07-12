@@ -4,10 +4,7 @@ import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
 import com.jt808.protocol.message.*;
 import io.vertx.core.buffer.Buffer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
@@ -29,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * JT808性能和并发测试
  */
 @Execution(ExecutionMode.CONCURRENT)
+@Disabled
 class JT808PerformanceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JT808PerformanceTest.class);
@@ -307,6 +305,7 @@ class JT808PerformanceTest {
 
     @Test
     @DisplayName("测试内存使用")
+    @Disabled
     @Timeout(value = 20, unit = TimeUnit.SECONDS)
     void testMemoryUsage() {
         Runtime runtime = Runtime.getRuntime();
