@@ -24,8 +24,6 @@ class StatusFlagTest {
     
     @Test
     void testBasicStatusFlags() {
-        // 测试基本状态位
-        
         // 测试ACC开关状态（第0位）
         report.setStatusFlag(0x00000001);
         assertTrue(report.isACCOn(), "ACC应该为开启状态");
@@ -40,31 +38,48 @@ class StatusFlagTest {
         report.setStatusFlag(0x00000000);
         assertFalse(report.isPositioned(), "应该为未定位状态");
         
-        // 测试经纬度方向（第2-3位）
-        report.setStatusFlag(0x00000004); // 西经
-        assertTrue(report.isWestLongitude(), "应该为西经");
-        assertFalse(report.isSouthLatitude(), "不应该为南纬");
-        
-        report.setStatusFlag(0x00000008); // 南纬
-        assertFalse(report.isWestLongitude(), "不应该为西经");
+        // 测试南北纬状态（第2位）
+        report.setStatusFlag(0x00000004);
         assertTrue(report.isSouthLatitude(), "应该为南纬");
         
-        report.setStatusFlag(0x0000000C); // 西经 + 南纬
+        report.setStatusFlag(0x00000000);
+        assertFalse(report.isSouthLatitude(), "应该为北纬");
+        
+        // 测试东西经状态（第3位）
+        report.setStatusFlag(0x00000008);
         assertTrue(report.isWestLongitude(), "应该为西经");
-        assertTrue(report.isSouthLatitude(), "应该为南纬");
+        
+        report.setStatusFlag(0x00000000);
+        assertFalse(report.isWestLongitude(), "应该为东经");
         
         // 测试运营状态（第4位）
         report.setStatusFlag(0x00000010);
-        assertFalse(report.isOutOfService(), "应该为运营状态");
+        assertTrue(report.isOutOfService(), "应该为停运状态");
         
         report.setStatusFlag(0x00000000);
-        assertTrue(report.isOutOfService(), "应该为停运状态");
+        assertFalse(report.isOutOfService(), "应该为运营状态");
+        
+        // 测试经纬度加密状态（第5位）
+        report.setStatusFlag(0x00000020);
+        assertTrue(report.isCoordinateEncrypted(), "经纬度应该为加密状态");
+        
+        report.setStatusFlag(0x00000000);
+        assertFalse(report.isCoordinateEncrypted(), "经纬度应该为未加密状态");
+        
+        // 测试组合状态
+        report.setStatusFlag(0x0000003F); // 前6位全部置1
+        assertTrue(report.isACCOn(), "ACC应该开启");
+        assertTrue(report.isPositioned(), "应该已定位");
+        assertTrue(report.isSouthLatitude(), "应该为南纬");
+        assertTrue(report.isWestLongitude(), "应该为西经");
+        assertTrue(report.isOutOfService(), "应该为停运");
+        assertTrue(report.isCoordinateEncrypted(), "经纬度应该加密");
     }
     
     @Test
     void testLoadStatus() {
-        // 测试载重状态（第5位）
-        report.setStatusFlag(0x00000020); // 满载
+        // 测试载重状态（第8-9位）
+        report.setStatusFlag(0x00000300); // 满载 (第8-9位都为1)
         assertEquals(3, report.getLoadStatus(), "应该为满载状态");
         
         report.setStatusFlag(0x00000000); // 空车
@@ -73,61 +88,61 @@ class StatusFlagTest {
     
     @Test
     void testVehicleCircuitStatus() {
-        // 测试车辆电路状态（第6-7位）
+        // 测试车辆电路状态（第10-11位）
         
-        // 测试油路状态（第6位）
-        report.setStatusFlag(0x00000040);
+        // 测试油路状态（第10位）
+        report.setStatusFlag(0x00000400);
         assertTrue(report.isOilCircuitDisconnected(), "油路应该为断开状态");
         
         report.setStatusFlag(0x00000000);
         assertFalse(report.isOilCircuitDisconnected(), "油路应该为正常状态");
         
-        // 测试电路状态（第7位）
-        report.setStatusFlag(0x00000080);
+        // 测试电路状态（第11位）
+        report.setStatusFlag(0x00000800);
         assertTrue(report.isElectricCircuitDisconnected(), "电路应该为断开状态");
         
         report.setStatusFlag(0x00000000);
         assertFalse(report.isElectricCircuitDisconnected(), "电路应该为正常状态");
         
         // 测试组合状态
-        report.setStatusFlag(0x000000C0); // 油路断开 + 电路断开
+        report.setStatusFlag(0x00000C00); // 油路断开 + 电路断开
         assertTrue(report.isOilCircuitDisconnected(), "油路应该为断开状态");
         assertTrue(report.isElectricCircuitDisconnected(), "电路应该为断开状态");
     }
     
     @Test
     void testDoorStatus() {
-        // 测试车门状态（第8-13位）
+        // 测试车门状态（第12-17位）
         
-        // 测试车门加锁状态（第8位）
-        report.setStatusFlag(0x00000100);
+        // 测试车门加锁状态（第12位）
+        report.setStatusFlag(0x00001000);
         assertTrue(report.isDoorLocked(), "车门应该为加锁状态");
         
         report.setStatusFlag(0x00000000);
         assertFalse(report.isDoorLocked(), "车门应该为解锁状态");
         
-        // 测试前门状态（第9位）
-        report.setStatusFlag(0x00000200);
+        // 测试前门状态（第13位）
+        report.setStatusFlag(0x00002000);
         assertTrue(report.isDoor1Open(), "前门应该为开启状态");
         
-        // 测试中门状态（第10位）
-        report.setStatusFlag(0x00000400);
+        // 测试中门状态（第14位）
+        report.setStatusFlag(0x00004000);
         assertTrue(report.isDoor2Open(), "中门应该为开启状态");
         
-        // 测试后门状态（第11位）
-        report.setStatusFlag(0x00000800);
+        // 测试后门状态（第15位）
+        report.setStatusFlag(0x00008000);
         assertTrue(report.isDoor3Open(), "后门应该为开启状态");
         
-        // 测试驾驶席门状态（第12位）
-        report.setStatusFlag(0x00001000);
+        // 测试驾驶席门状态（第16位）
+        report.setStatusFlag(0x00010000);
         assertTrue(report.isDoor4Open(), "驾驶席门应该为开启状态");
         
-        // 测试自定义门状态（第13位）
-        report.setStatusFlag(0x00002000);
+        // 测试自定义门状态（第17位）
+        report.setStatusFlag(0x00020000);
         assertTrue(report.isDoor5Open(), "自定义门应该为开启状态");
         
         // 测试所有门都开启
-        report.setStatusFlag(0x00003E00); // 第9-13位全部置1
+        report.setStatusFlag(0x0003E000); // 第13-17位全部置1
         assertTrue(report.isDoor1Open(), "前门应该开启");
         assertTrue(report.isDoor2Open(), "中门应该开启");
         assertTrue(report.isDoor3Open(), "后门应该开启");
@@ -185,42 +200,46 @@ class StatusFlagTest {
     
     @Test
     void testComplexStatusCombinations() {
-        // 测试复杂的状态位组合
+        // 测试复杂状态组合
         
-        // 组合1: ACC开 + 已定位 + 运营中 + 满载 + GPS定位
-        int status1 = 0x00000001 | 0x00000002 | 0x00000010 | 0x00000020 | 0x00040000;
-        report.setStatusFlag(status1);
-        
+        // 场景1：车辆正常行驶状态
+        // ACC开启 + 已定位 + 北纬 + 东经 + 运营中 + 未加密 + 空车 + 油路正常 + 电路正常 + 车门解锁
+        report.setStatusFlag(0x00000003); // ACC开启 + 已定位
         assertTrue(report.isACCOn(), "ACC应该开启");
         assertTrue(report.isPositioned(), "应该已定位");
+        assertFalse(report.isSouthLatitude(), "应该为北纬");
+        assertFalse(report.isWestLongitude(), "应该为东经");
         assertFalse(report.isOutOfService(), "应该为运营状态");
-        assertEquals(3, report.getLoadStatus(), "应该为满载状态");
-        assertTrue(report.isGPSPositioning(), "应该使用GPS定位");
+        assertFalse(report.isCoordinateEncrypted(), "经纬度不应该加密");
+        assertEquals(0, report.getLoadStatus(), "应该为空车");
+        assertFalse(report.isOilCircuitDisconnected(), "油路应该正常");
+        assertFalse(report.isElectricCircuitDisconnected(), "电路应该正常");
+        assertFalse(report.isDoorLocked(), "车门不应该加锁");
         
-        assertFalse(report.isWestLongitude(), "不应该为西经");
-        assertFalse(report.isSouthLatitude(), "不应该为南纬");
-        assertFalse(report.isOilCircuitDisconnected(), "油路不应该断开");
-        assertFalse(report.isElectricCircuitDisconnected(), "电路不应该断开");
-        
-        // 组合2: 西经南纬 + 所有门开启 + 多系统定位
-        int status2 = 0x0000000C | 0x00003E00 | 0x003C0000;
-        report.setStatusFlag(status2);
-        
-        assertTrue(report.isWestLongitude(), "应该为西经");
+        // 场景2：车辆停车状态
+        // ACC关闭 + 已定位 + 南纬 + 西经 + 停运 + 加密 + 满载 + 油路断开 + 电路断开 + 车门加锁 + 所有门关闭
+        report.setStatusFlag(0x00001F3E); // 复杂组合状态
+        assertFalse(report.isACCOn(), "ACC应该关闭");
+        assertTrue(report.isPositioned(), "应该已定位");
         assertTrue(report.isSouthLatitude(), "应该为南纬");
+        assertTrue(report.isWestLongitude(), "应该为西经");
+        assertTrue(report.isOutOfService(), "应该为停运状态");
+        assertTrue(report.isCoordinateEncrypted(), "经纬度应该加密");
+        assertEquals(3, report.getLoadStatus(), "应该为满载");
+        assertTrue(report.isOilCircuitDisconnected(), "油路应该断开");
+        assertTrue(report.isElectricCircuitDisconnected(), "电路应该断开");
+        assertTrue(report.isDoorLocked(), "车门应该加锁");
+        
+        // 场景3：紧急状态
+        // ACC开启 + 未定位 + 所有门开启
+        report.setStatusFlag(0x0003E001); // ACC开启 + 所有门开启
+        assertTrue(report.isACCOn(), "ACC应该开启");
+        assertFalse(report.isPositioned(), "应该未定位");
         assertTrue(report.isDoor1Open(), "前门应该开启");
         assertTrue(report.isDoor2Open(), "中门应该开启");
         assertTrue(report.isDoor3Open(), "后门应该开启");
         assertTrue(report.isDoor4Open(), "驾驶席门应该开启");
         assertTrue(report.isDoor5Open(), "自定义门应该开启");
-        assertTrue(report.isGPSPositioning(), "应该使用GPS定位");
-        assertTrue(report.isBeidouPositioning(), "应该使用北斗定位");
-        assertTrue(report.isGLONASSPositioning(), "应该使用GLONASS定位");
-        assertTrue(report.isGalileoPositioning(), "应该使用Galileo定位");
-        
-        assertFalse(report.isACCOn(), "ACC不应该开启");
-        assertFalse(report.isPositioned(), "不应该已定位");
-        assertFalse(report.isDoorLocked(), "车门不应该加锁");
     }
     
     @Test
@@ -268,11 +287,11 @@ class StatusFlagTest {
         String toStringResult = report.toString();
         
         // 验证toString包含状态位信息
-        assertTrue(toStringResult.contains("ACC状态: 开启"), "应该包含ACC状态");
+        assertTrue(toStringResult.contains("ACC开关: 开"), "应该包含ACC状态");
         assertTrue(toStringResult.contains("定位状态: 已定位"), "应该包含定位状态");
-        assertTrue(toStringResult.contains("运营状态: 运营中"), "应该包含运营状态");
+        assertTrue(toStringResult.contains("运营状态: 停运"), "应该包含运营状态");
         assertTrue(toStringResult.contains("载重状态: 空车"), "应该包含载重状态");
-        assertTrue(toStringResult.contains("GPS: 是"), "应该包含GPS状态");
+        assertTrue(toStringResult.contains("GPS定位: 使用"), "应该包含GPS状态");
         
         logger.info("状态位toString测试:");
         logger.info(toStringResult);

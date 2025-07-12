@@ -174,17 +174,17 @@ class AlarmFlagTest {
         T0200LocationReport report = new T0200LocationReport();
         
         // 测试碰撞预警（第29位）
-        report.setAlarmFlag(0x10000000); // 第29位
+        report.setAlarmFlag(0x20000000); // 第29位
         assertTrue(report.hasCollisionWarning(), "应该检测到碰撞预警");
         assertFalse(report.hasRolloverWarning(), "不应该检测到侧翻预警");
         
         // 测试侧翻预警（第30位）
-        report.setAlarmFlag(0x20000000); // 第30位
+        report.setAlarmFlag(0x40000000); // 第30位
         assertFalse(report.hasCollisionWarning(), "不应该检测到碰撞预警");
         assertTrue(report.hasRolloverWarning(), "应该检测到侧翻预警");
         
         // 测试同时有碰撞和侧翻预警
-        report.setAlarmFlag(0x30000000); // 第29位 + 第30位
+        report.setAlarmFlag(0x60000000); // 第29位 + 第30位
         assertTrue(report.hasCollisionWarning(), "应该检测到碰撞预警");
         assertTrue(report.hasRolloverWarning(), "应该检测到侧翻预警");
         
@@ -222,7 +222,7 @@ class AlarmFlagTest {
         // 验证报警描述
         List<String> alarms = report.getActiveAlarmDescriptions();
         assertEquals(3, alarms.size(), "应该有3个激活的报警");
-        assertTrue(alarms.contains("IC卡模块故障"), "应该包含IC卡模块故障描述");
+        assertTrue(alarms.contains("道路运输证IC卡模块故障"), "应该包含IC卡模块故障描述");
         assertTrue(alarms.contains("超速预警"), "应该包含超速预警描述");
         assertTrue(alarms.contains("疲劳驾驶预警"), "应该包含疲劳驾驶预警描述");
         
