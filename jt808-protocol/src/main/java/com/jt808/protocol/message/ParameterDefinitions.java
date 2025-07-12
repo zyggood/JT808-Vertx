@@ -1,6 +1,9 @@
 package com.jt808.protocol.message;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 终端参数定义
@@ -8,7 +11,7 @@ import java.util.*;
  */
 public class ParameterDefinitions {
     private static final Map<Long, String> PARAMETER_DESCRIPTIONS = new HashMap<>();
-    
+
     static {
         // 通信参数
         PARAMETER_DESCRIPTIONS.put(0x0001L, "终端心跳发送间隔(s)");
@@ -18,7 +21,7 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x0005L, "UDP消息重传次数");
         PARAMETER_DESCRIPTIONS.put(0x0006L, "SMS消息应答超时时间(s)");
         PARAMETER_DESCRIPTIONS.put(0x0007L, "SMS消息重传次数");
-        
+
         // 网络参数
         PARAMETER_DESCRIPTIONS.put(0x0010L, "主服务器APN");
         PARAMETER_DESCRIPTIONS.put(0x0011L, "主服务器无线通信拨号用户名");
@@ -34,7 +37,7 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x001BL, "道路运输证IC卡认证主服务器TCP端口");
         PARAMETER_DESCRIPTIONS.put(0x001CL, "道路运输证IC卡认证主服务器UDP端口");
         PARAMETER_DESCRIPTIONS.put(0x001DL, "道路运输证IC卡认证备份服务器IP地址或域名");
-        
+
         // 位置汇报参数
         PARAMETER_DESCRIPTIONS.put(0x0020L, "位置汇报策略");
         PARAMETER_DESCRIPTIONS.put(0x0021L, "位置汇报方案");
@@ -48,7 +51,7 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x002FL, "紧急报警时汇报距离间隔(m)");
         PARAMETER_DESCRIPTIONS.put(0x0030L, "拐点补传角度");
         PARAMETER_DESCRIPTIONS.put(0x0031L, "电子围栏半径(m)");
-        
+
         // 电话参数
         PARAMETER_DESCRIPTIONS.put(0x0040L, "监控平台电话号码");
         PARAMETER_DESCRIPTIONS.put(0x0041L, "复位电话号码");
@@ -60,7 +63,7 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x0047L, "当月最长通话时间(s)");
         PARAMETER_DESCRIPTIONS.put(0x0048L, "监听电话号码");
         PARAMETER_DESCRIPTIONS.put(0x0049L, "监管平台特权短信号码");
-        
+
         // 报警参数
         PARAMETER_DESCRIPTIONS.put(0x0050L, "报警屏蔽字");
         PARAMETER_DESCRIPTIONS.put(0x0051L, "报警发送文本SMS开关");
@@ -77,25 +80,25 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x005CL, "疲劳驾驶预警差值(s)");
         PARAMETER_DESCRIPTIONS.put(0x005DL, "碰撞报警参数设置");
         PARAMETER_DESCRIPTIONS.put(0x005EL, "侧翻报警参数设置");
-        
+
         // 拍照参数
         PARAMETER_DESCRIPTIONS.put(0x0064L, "定时拍照控制");
         PARAMETER_DESCRIPTIONS.put(0x0065L, "定距拍照控制");
-        
+
         // 图像参数
         PARAMETER_DESCRIPTIONS.put(0x0070L, "图像/视频质量");
         PARAMETER_DESCRIPTIONS.put(0x0071L, "亮度");
         PARAMETER_DESCRIPTIONS.put(0x0072L, "对比度");
         PARAMETER_DESCRIPTIONS.put(0x0073L, "饱和度");
         PARAMETER_DESCRIPTIONS.put(0x0074L, "色度");
-        
+
         // 车辆参数
         PARAMETER_DESCRIPTIONS.put(0x0080L, "车辆里程表读数(1/10km)");
         PARAMETER_DESCRIPTIONS.put(0x0081L, "车辆所在的省域ID");
         PARAMETER_DESCRIPTIONS.put(0x0082L, "车辆所在的市域ID");
         PARAMETER_DESCRIPTIONS.put(0x0083L, "公安交通管理部门颁发的机动车号牌");
         PARAMETER_DESCRIPTIONS.put(0x0084L, "车牌颜色");
-        
+
         // GNSS参数
         PARAMETER_DESCRIPTIONS.put(0x0090L, "GNSS定位模式");
         PARAMETER_DESCRIPTIONS.put(0x0091L, "GNSS波特率");
@@ -103,7 +106,7 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x0093L, "GNSS模块详细定位数据采集频率(s)");
         PARAMETER_DESCRIPTIONS.put(0x0094L, "GNSS模块详细定位数据上传方式");
         PARAMETER_DESCRIPTIONS.put(0x0095L, "GNSS模块详细定位数据上传设置");
-        
+
         // CAN总线参数
         PARAMETER_DESCRIPTIONS.put(0x0100L, "CAN总线通道1采集时间间隔(ms)");
         PARAMETER_DESCRIPTIONS.put(0x0101L, "CAN总线通道1上传时间间隔(s)");
@@ -111,7 +114,7 @@ public class ParameterDefinitions {
         PARAMETER_DESCRIPTIONS.put(0x0103L, "CAN总线通道2上传时间间隔(s)");
         PARAMETER_DESCRIPTIONS.put(0x0110L, "CAN总线ID单独采集设置");
     }
-    
+
     /**
      * 获取参数描述
      */
@@ -120,7 +123,7 @@ public class ParameterDefinitions {
         if (description != null) {
             return description;
         }
-        
+
         // 处理范围参数
         if (parameterId >= 0x0111L && parameterId <= 0x01FFL) {
             return "CAN总线ID单独采集设置(" + String.format("0x%04X", parameterId) + ")";
@@ -130,7 +133,7 @@ public class ParameterDefinitions {
             return "未知参数(" + String.format("0x%04X", parameterId) + ")";
         }
     }
-    
+
     /**
      * 获取所有已定义的参数ID
      */

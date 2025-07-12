@@ -1,9 +1,9 @@
 package com.jt808.protocol.message;
 
 import io.vertx.core.buffer.Buffer;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -172,7 +172,7 @@ class T8100TerminalRegisterResponseTest {
     @DisplayName("测试静态工厂方法")
     void testStaticFactoryMethods() {
         // 测试创建成功应答
-        T8100TerminalRegisterResponse successResponse = 
+        T8100TerminalRegisterResponse successResponse =
                 T8100TerminalRegisterResponse.createSuccessResponse(12345, "AUTH123");
         assertNotNull(successResponse);
         assertEquals(12345, successResponse.getResponseSerialNumber());
@@ -181,7 +181,7 @@ class T8100TerminalRegisterResponseTest {
         assertTrue(successResponse.isSuccess());
 
         // 测试创建失败应答
-        T8100TerminalRegisterResponse failureResponse = 
+        T8100TerminalRegisterResponse failureResponse =
                 T8100TerminalRegisterResponse.createFailureResponse(54321, T8100TerminalRegisterResponse.RESULT_VEHICLE_REGISTERED);
         assertNotNull(failureResponse);
         assertEquals(54321, failureResponse.getResponseSerialNumber());

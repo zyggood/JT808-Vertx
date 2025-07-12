@@ -15,65 +15,65 @@ import java.util.List;
  * 验证JT808消息的基本格式和必要字段
  */
 public class BasicMessageValidator implements MessageValidator {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(BasicMessageValidator.class);
-    
+
     private final boolean strict;
-    
+
     public BasicMessageValidator() {
         this(true);
     }
-    
+
     public BasicMessageValidator(boolean strict) {
         this.strict = strict;
     }
-    
+
     @Override
     public Future<ValidationResult> validate(JT808Message message) {
         List<ValidationError> errors = new ArrayList<>();
         List<ValidationWarning> warnings = new ArrayList<>();
-        
+
         try {
             // 验证消息不为空
             if (message == null) {
                 errors.add(new ValidationError("NULL_MESSAGE", "Message cannot be null"));
                 return Future.succeededFuture(ValidationResult.failure(getName(), errors));
             }
-            
+
             // 验证消息头
             validateHeader(message.getHeader(), errors, warnings);
-            
+
             // 验证消息体长度
             validateBodyLength(message, errors, warnings);
-            
+
             // 验证消息ID
             validateMessageId(message.getHeader(), errors, warnings);
-            
+
             // 验证终端手机号
             validateTerminalPhone(message.getHeader(), errors, warnings);
-            
+
             // 验证流水号
             validateSerialNumber(message.getHeader(), errors, warnings);
-            
+
             boolean isValid = errors.isEmpty();
-            
+
             if (isValid) {
-                logger.debug("Message validation passed for message ID: 0x{}", 
+                logger.debug("Message validation passed for message ID: 0x{}",
                         Integer.toHexString(message.getHeader().getMessageId()).toUpperCase());
                 return Future.succeededFuture(ValidationResult.success(getName(), warnings));
             } else {
-                logger.warn("Message validation failed with {} errors for message ID: 0x{}", 
+                logger.warn("Message validation failed with {} errors for message ID: 0x{}",
                         errors.size(), Integer.toHexString(message.getHeader().getMessageId()).toUpperCase());
                 return Future.succeededFuture(ValidationResult.failure(getName(), errors));
             }
-            
+
         } catch (Exception e) {
             logger.error("Exception during message validation", e);
             errors.add(new ValidationError("VALIDATION_EXCEPTION", "Validation failed with exception: " + e.getMessage()));
             return Future.succeededFuture(ValidationResult.failure(getName(), errors));
         }
     }
-    
+
     /**
      * 验证消息头
      */
@@ -82,112 +82,112 @@ public class BasicMessageValidator implements MessageValidator {
             errors.add(new ValidationError("NULL_HEADER", "Message header cannot be null"));
             return;
         }
-        
+
         // 验证消息属性
         if (header.getMessageProperty() < 0) {
-            errors.add(new ValidationError("INVALID_MESSAGE_PROPERTIES", 
+            errors.add(new ValidationError("INVALID_MESSAGE_PROPERTIES",
                     "Message properties cannot be negative", "messageProperties", header.getMessageProperty()));
         }
-        
+
         // 验证消息体长度属性
         int bodyLength = header.getMessageProperty() & 0x3FF; // 低10位为消息体长度
     }
-    
+
     /**
      * 验证消息体长度
      */
     private void validateBodyLength(JT808Message message, List<ValidationError> errors, List<ValidationWarning> warnings) {
         JT808Header header = message.getHeader();
         if (header == null) return;
-        
+
         int declaredLength = header.getMessageProperty() & 0x3FF;
-        
+
         // 如果消息有编码后的数据，验证长度一致性
         try {
             byte[] encodedBody = message.encodeBody().getBytes();
             if (encodedBody != null && encodedBody.length != declaredLength) {
                 if (strict) {
-                    errors.add(new ValidationError("BODY_LENGTH_MISMATCH", 
-                            String.format("Declared body length (%d) does not match actual length (%d)", 
+                    errors.add(new ValidationError("BODY_LENGTH_MISMATCH",
+                            String.format("Declared body length (%d) does not match actual length (%d)",
                                     declaredLength, encodedBody.length),
                             "bodyLength", declaredLength));
                 } else {
-                    warnings.add(new ValidationWarning("BODY_LENGTH_MISMATCH", 
-                            String.format("Declared body length (%d) does not match actual length (%d)", 
+                    warnings.add(new ValidationWarning("BODY_LENGTH_MISMATCH",
+                            String.format("Declared body length (%d) does not match actual length (%d)",
                                     declaredLength, encodedBody.length),
                             "bodyLength", declaredLength));
                 }
             }
         } catch (Exception e) {
-            warnings.add(new ValidationWarning("BODY_ENCODING_FAILED", 
+            warnings.add(new ValidationWarning("BODY_ENCODING_FAILED",
                     "Could not encode message body for length validation: " + e.getMessage()));
         }
     }
-    
+
     /**
      * 验证消息ID
      */
     private void validateMessageId(JT808Header header, List<ValidationError> errors, List<ValidationWarning> warnings) {
         if (header == null) return;
-        
+
         int messageId = header.getMessageId();
-        
+
         // 验证消息ID范围（JT808协议定义的有效范围）
         if (messageId <= 0 || messageId > 0xFFFF) {
-            errors.add(new ValidationError("INVALID_MESSAGE_ID", 
+            errors.add(new ValidationError("INVALID_MESSAGE_ID",
                     "Message ID must be between 0x0001 and 0xFFFF", "messageId", messageId));
         }
-        
+
         // 检查是否为已知的消息类型
         if (!isKnownMessageId(messageId)) {
-            warnings.add(new ValidationWarning("UNKNOWN_MESSAGE_ID", 
+            warnings.add(new ValidationWarning("UNKNOWN_MESSAGE_ID",
                     "Message ID is not in the list of known message types", "messageId", messageId));
         }
     }
-    
+
     /**
      * 验证终端手机号
      */
     private void validateTerminalPhone(JT808Header header, List<ValidationError> errors, List<ValidationWarning> warnings) {
         if (header == null) return;
-        
+
         String terminalPhone = header.getPhoneNumber();
-        
+
         if (terminalPhone == null || terminalPhone.trim().isEmpty()) {
-            errors.add(new ValidationError("EMPTY_TERMINAL_PHONE", 
+            errors.add(new ValidationError("EMPTY_TERMINAL_PHONE",
                     "Terminal phone number cannot be null or empty", "phoneNumber", terminalPhone));
             return;
         }
-        
+
         // 验证手机号格式（应该是数字）
         if (!terminalPhone.matches("\\d+")) {
-            errors.add(new ValidationError("INVALID_TERMINAL_PHONE_FORMAT", 
+            errors.add(new ValidationError("INVALID_TERMINAL_PHONE_FORMAT",
                     "Terminal phone number should contain only digits", "terminalPhone", terminalPhone));
         }
-        
+
         // 验证手机号长度（通常为11位或12位）
         if (terminalPhone.length() < 10 || terminalPhone.length() > 12) {
-            warnings.add(new ValidationWarning("UNUSUAL_TERMINAL_PHONE_LENGTH", 
-                    "Terminal phone number length is unusual (expected 10-12 digits)", 
+            warnings.add(new ValidationWarning("UNUSUAL_TERMINAL_PHONE_LENGTH",
+                    "Terminal phone number length is unusual (expected 10-12 digits)",
                     "terminalPhone", terminalPhone));
         }
     }
-    
+
     /**
      * 验证流水号
      */
     private void validateSerialNumber(JT808Header header, List<ValidationError> errors, List<ValidationWarning> warnings) {
         if (header == null) return;
-        
+
         int serialNumber = header.getSerialNumber();
-        
+
         // 验证流水号范围
         if (serialNumber < 0 || serialNumber > 0xFFFF) {
-            errors.add(new ValidationError("INVALID_SERIAL_NUMBER", 
+            errors.add(new ValidationError("INVALID_SERIAL_NUMBER",
                     "Serial number must be between 0 and 65535", "serialNumber", serialNumber));
         }
     }
-    
+
     /**
      * 检查是否为已知的消息ID
      */
@@ -247,22 +247,22 @@ public class BasicMessageValidator implements MessageValidator {
                 return false;
         }
     }
-    
+
     @Override
     public String getName() {
         return "BasicMessageValidator";
     }
-    
+
     @Override
     public int getPriority() {
         return 100; // 基础验证器优先级较高
     }
-    
+
     @Override
     public boolean canValidate(JT808Message message) {
         return message != null; // 可以验证所有消息
     }
-    
+
     @Override
     public boolean isStrict() {
         return strict;

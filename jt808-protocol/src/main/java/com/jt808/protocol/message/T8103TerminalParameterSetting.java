@@ -1,121 +1,125 @@
 package com.jt808.protocol.message;
 
 import io.vertx.core.buffer.Buffer;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 设置终端参数消息 (0x8103)
  * 平台向终端发送参数设置指令
  */
 public class T8103TerminalParameterSetting extends JT808Message {
-    
-    /** 参数项列表 */
+
+    /**
+     * 参数项列表
+     */
     private List<ParameterItem> parameterItems;
-    
+
     public T8103TerminalParameterSetting() {
         super();
         this.parameterItems = new ArrayList<>();
     }
-    
+
     public T8103TerminalParameterSetting(JT808Header header) {
         super(header);
         this.parameterItems = new ArrayList<>();
     }
-    
+
     @Override
     public int getMessageId() {
         return 0x8103;
     }
-    
+
     @Override
     public Buffer encodeBody() {
         Buffer buffer = Buffer.buffer();
-        
+
         // 参数总数 (1字节)
         buffer.appendByte((byte) parameterItems.size());
-        
+
         // 参数项列表
         for (ParameterItem item : parameterItems) {
             // 参数ID (4字节)
             buffer.appendUnsignedInt(item.getParameterId());
-            
+
             // 参数值字节数组
             byte[] valueBytes = item.getValueBytes();
-            
+
             // 参数长度 (1字节)
             buffer.appendByte((byte) valueBytes.length);
-            
+
             // 参数值
             buffer.appendBytes(valueBytes);
         }
-        
+
         return buffer;
     }
-    
+
     @Override
     public void decodeBody(Buffer body) {
         int index = 0;
         parameterItems.clear();
-        
+
         // 参数总数 (1字节)
         int parameterCount = body.getUnsignedByte(index);
         index += 1;
-        
+
         // 解析参数项列表
         for (int i = 0; i < parameterCount; i++) {
             // 参数ID (4字节)
             long parameterId = body.getUnsignedInt(index);
             index += 4;
-            
+
             // 参数长度 (1字节)
             int parameterLength = body.getUnsignedByte(index);
             index += 1;
-            
+
             // 参数值
             byte[] valueBytes = body.getBytes(index, index + parameterLength);
             index += parameterLength;
-            
+
             // 创建参数项
             ParameterItem item = new ParameterItem(parameterId, valueBytes);
             parameterItems.add(item);
         }
     }
-    
+
     /**
      * 添加DWORD类型参数
      */
     public void addDwordParameter(long parameterId, long value) {
         parameterItems.add(ParameterItem.createDwordParameter(parameterId, value));
     }
-    
+
     /**
      * 添加WORD类型参数
      */
     public void addWordParameter(long parameterId, int value) {
         parameterItems.add(ParameterItem.createWordParameter(parameterId, value));
     }
-    
+
     /**
      * 添加BYTE类型参数
      */
     public void addByteParameter(long parameterId, byte value) {
         parameterItems.add(ParameterItem.createByteParameter(parameterId, value));
     }
-    
+
     /**
      * 添加STRING类型参数
      */
     public void addStringParameter(long parameterId, String value) {
         parameterItems.add(ParameterItem.createStringParameter(parameterId, value));
     }
-    
+
     /**
      * 添加字节数组类型参数
      */
     public void addBytesParameter(long parameterId, byte[] value) {
         parameterItems.add(new ParameterItem(parameterId, value));
     }
-    
+
     /**
      * 获取DWORD类型参数值
      */
@@ -123,7 +127,7 @@ public class T8103TerminalParameterSetting extends JT808Message {
         ParameterItem item = getParameterItem(parameterId);
         return item != null ? item.getDwordValue() : null;
     }
-    
+
     /**
      * 获取WORD类型参数值
      */
@@ -131,7 +135,7 @@ public class T8103TerminalParameterSetting extends JT808Message {
         ParameterItem item = getParameterItem(parameterId);
         return item != null ? item.getWordValue() : null;
     }
-    
+
     /**
      * 获取BYTE类型参数值
      */
@@ -139,7 +143,7 @@ public class T8103TerminalParameterSetting extends JT808Message {
         ParameterItem item = getParameterItem(parameterId);
         return item != null ? item.getByteValue() : null;
     }
-    
+
     /**
      * 获取STRING类型参数值
      */
@@ -147,7 +151,7 @@ public class T8103TerminalParameterSetting extends JT808Message {
         ParameterItem item = getParameterItem(parameterId);
         return item != null ? item.getStringValue() : null;
     }
-    
+
     /**
      * 获取参数项
      */
@@ -157,37 +161,37 @@ public class T8103TerminalParameterSetting extends JT808Message {
                 .findFirst()
                 .orElse(null);
     }
-    
+
     /**
      * 移除参数
      */
     public boolean removeParameter(long parameterId) {
         return parameterItems.removeIf(item -> item.getParameterId() == parameterId);
     }
-    
+
     /**
      * 清空所有参数
      */
     public void clearParameters() {
         parameterItems.clear();
     }
-    
+
     // Getters and Setters
     public List<ParameterItem> getParameterItems() {
         return new ArrayList<>(parameterItems);
     }
-    
+
     public void setParameterItems(List<ParameterItem> parameterItems) {
         this.parameterItems = new ArrayList<>(parameterItems);
     }
-    
+
     /**
      * 获取参数总数
      */
     public int getParameterCount() {
         return parameterItems.size();
     }
-    
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -202,8 +206,6 @@ public class T8103TerminalParameterSetting extends JT808Message {
         sb.append('}');
         return sb.toString();
     }
-    
 
-    
 
 }

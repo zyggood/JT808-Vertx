@@ -3,7 +3,7 @@ package com.jt808.protocol.common;
 /**
  * JT808协议报警类型枚举
  * 提供类型安全的报警标志位定义
- *
+ * <p>
  * 位 定义 处理说明
  * 0 1：紧急报警，触动报警开关后触发 收到应答后清零
  * 1 1：超速报警 标志维持至报警条件解除
@@ -39,7 +39,7 @@ package com.jt808.protocol.common;
  * 31 1：非法开门报警（终端未设置区域时，不判断非法开门） 收到应答后清零
  */
 public enum AlarmType {
-    
+
     // 基础报警类型 (0x00000001 - 0x00000800)
     EMERGENCY(0x00000001, "紧急报警", "终端触发紧急报警按钮"),
     SPEEDING(0x00000002, "超速报警", "车辆超过限定速度"),
@@ -53,7 +53,7 @@ public enum AlarmType {
     LCD_FAULT(0x00000200, "LCD故障", "终端LCD或显示器故障"),
     TTS_FAULT(0x00000400, "TTS模块故障", "TTS模块故障"),
     CAMERA_FAULT(0x00000800, "摄像头故障", "摄像头故障"),
-    
+
     // 驾驶行为报警 (0x00040000 - 0x00800000)
     DAILY_DRIVING_TIMEOUT(0x00040000, "当天累计驾驶超时", "当天累计驾驶超时"),
     OVERTIME_PARKING(0x00080000, "超时停车", "超时停车"),
@@ -61,7 +61,7 @@ public enum AlarmType {
     ROUTE_IN_OUT_ALARM(0x00200000, "进出路线报警", "进出路线报警"),
     ROAD_SECTION_TIME_ALARM(0x00400000, "路段行驶时间报警", "路段行驶时间不足/过长"),
     ROUTE_DEVIATION_ALARM(0x00800000, "路线偏离报警", "路线偏离报警"),
-    
+
     // 车辆状态报警 (0x01000000 - 0x40000000)
     VSS_FAULT(0x01000000, "VSS故障", "车辆VSS故障"),
     FUEL_ABNORMAL(0x02000000, "油量异常", "车辆油量异常"),
@@ -70,45 +70,17 @@ public enum AlarmType {
     ILLEGAL_DISPLACEMENT(0x10000000, "非法位移", "车辆非法位移"),
     COLLISION_ROLLOVER(0x20000000, "碰撞侧翻报警", "碰撞侧翻报警"),
     ILLEGAL_DOOR_OPEN(0x40000000, "非法开门报警", "非法开门报警(终端未设防时，车门开启，且车辆未启动)");
-    
+
     private final int flag;
     private final String name;
     private final String description;
-    
+
     AlarmType(int flag, String name, String description) {
         this.flag = flag;
         this.name = name;
         this.description = description;
     }
-    
-    /**
-     * 获取报警标志位
-     */
-    public int getFlag() {
-        return flag;
-    }
-    
-    /**
-     * 获取报警名称
-     */
-    public String getName() {
-        return name;
-    }
-    
-    /**
-     * 获取报警描述
-     */
-    public String getDescription() {
-        return description;
-    }
-    
-    /**
-     * 检查指定的报警标志位是否包含此报警类型
-     */
-    public boolean isSet(int alarmFlag) {
-        return (alarmFlag & this.flag) != 0;
-    }
-    
+
     /**
      * 根据标志位获取报警类型
      */
@@ -120,7 +92,7 @@ public enum AlarmType {
         }
         throw new IllegalArgumentException("Unknown alarm flag: 0x" + Integer.toHexString(flag));
     }
-    
+
     /**
      * 获取所有激活的报警类型
      */
@@ -133,7 +105,7 @@ public enum AlarmType {
         }
         return activeAlarms;
     }
-    
+
     /**
      * 获取所有激活的报警描述
      */
@@ -142,7 +114,7 @@ public enum AlarmType {
                 .map(AlarmType::getName)
                 .collect(java.util.stream.Collectors.toList());
     }
-    
+
     /**
      * 组合多个报警类型为标志位
      */
@@ -153,7 +125,35 @@ public enum AlarmType {
         }
         return combined;
     }
-    
+
+    /**
+     * 获取报警标志位
+     */
+    public int getFlag() {
+        return flag;
+    }
+
+    /**
+     * 获取报警名称
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * 获取报警描述
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * 检查指定的报警标志位是否包含此报警类型
+     */
+    public boolean isSet(int alarmFlag) {
+        return (alarmFlag & this.flag) != 0;
+    }
+
     @Override
     public String toString() {
         return String.format("%s(0x%08X): %s", name, flag, description);

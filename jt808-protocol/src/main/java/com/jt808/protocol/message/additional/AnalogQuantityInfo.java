@@ -55,21 +55,21 @@ public class AnalogQuantityInfo extends AdditionalInfo {
     }
 
     /**
-     * 获取AD1值（bit16-31）
-     *
-     * @return AD1值
-     */
-    public int getAD1() {
-        return (int) ((analogValue >> 16) & 0xFFFF);
-    }
-
-    /**
      * 设置AD0值
      *
      * @param ad0 AD0值
      */
     public void setAD0(int ad0) {
         this.analogValue = (analogValue & 0xFFFF0000L) | (ad0 & 0xFFFF);
+    }
+
+    /**
+     * 获取AD1值（bit16-31）
+     *
+     * @return AD1值
+     */
+    public int getAD1() {
+        return (int) ((analogValue >> 16) & 0xFFFF);
     }
 
     /**
