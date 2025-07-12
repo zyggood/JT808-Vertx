@@ -1,13 +1,14 @@
 package com.jt808.protocol.message;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assertions.*;
 import io.vertx.core.buffer.Buffer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * 附加信息解析测试
@@ -433,7 +434,7 @@ class AdditionalInfoTest {
         assertEquals("行驶记录速度", speedDesc, "行驶记录速度描述应该正确");
         
         String alarmEventDesc = report.getAdditionalInfoDescription(0x04);
-        assertEquals("报警事件ID", alarmEventDesc, "报警事件ID描述应该正确");
+        assertEquals("人工确认报警事件ID", alarmEventDesc, "人工确认报警事件ID描述应该正确");
         
         String overspeedDesc = report.getAdditionalInfoDescription(0x11);
         assertEquals("超速报警附加信息", overspeedDesc, "超速报警描述应该正确");

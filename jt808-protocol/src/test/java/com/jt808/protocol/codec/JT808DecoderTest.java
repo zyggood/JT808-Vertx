@@ -11,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -349,7 +351,7 @@ class JT808DecoderTest {
         assertEquals("12345678901", message.getHeader().getPhoneNumber(), "终端手机号应为12345678901");
 
         // 验证这是一个T0200LocationReport消息
-        assertTrue(message instanceof T0200LocationReport, "消息应为T0200LocationReport类型");
+        assertInstanceOf(T0200LocationReport.class, message, "消息应为T0200LocationReport类型");
         
         T0200LocationReport locationReport = (T0200LocationReport) message;
         
@@ -373,6 +375,11 @@ class JT808DecoderTest {
         
         logger.info("message header: {}", message.getHeader().toString());
         logger.info("完整位置报告: {}", locationReport.toString());
+        Map<Integer, Object> parsedAdditionalInfo = locationReport.getParsedAdditionalInfo();
+
+        
+
+
     }
 
     @Test

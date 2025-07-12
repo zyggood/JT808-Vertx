@@ -1,14 +1,11 @@
 package com.jt808.protocol.message;
 
+import com.jt808.protocol.message.additional.*;
 import io.vertx.core.buffer.Buffer;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 /**
  * 位置信息汇报消息 (0x0200)
  * 终端定时或按需向平台汇报位置信息
@@ -38,22 +35,31 @@ public class T0200LocationReport extends JT808Message {
     
     /** 时间 (BCD[6] YY-MM-DD-hh-mm-ss GMT+8) */
     private LocalDateTime dateTime;
-    
-    /** 附加信息 */
-    private Buffer additionalInfo;
-    
+
     /**
-     * 解析后的附加信息
+     * 附加信息原始数据
+     */
+    private Buffer additionalInfo;
+
+    /**
+     * 解析后的附加信息列表
+     */
+    private List<AdditionalInfo> additionalInfoList;
+
+    /**
+     * 解析后的附加信息（兼容旧版本）
      */
     private Map<Integer, Object> parsedAdditionalInfo;
     
     public T0200LocationReport() {
         super();
+        this.additionalInfoList = new ArrayList<>();
         this.parsedAdditionalInfo = null; // 延迟解析：初始化为null
     }
     
     public T0200LocationReport(JT808Header header) {
         super(header);
+        this.additionalInfoList = new ArrayList<>();
         this.parsedAdditionalInfo = null; // 延迟解析：初始化为null
     }
     
@@ -102,9 +108,20 @@ public class T0200LocationReport extends JT808Message {
             // 如果时间为空，填充6个0字节
             buffer.appendBytes(new byte[6]);
         }
-        
-        // 附加信息
-        if (additionalInfo != null && additionalInfo.length() > 0) {
+
+        // 附加信息 - 优先使用新的附加信息列表
+        if (additionalInfoList != null && !additionalInfoList.isEmpty()) {
+            // 使用新的附加信息编码器
+            io.netty.buffer.ByteBuf nettyBuffer = io.netty.buffer.Unpooled.buffer();
+            AdditionalInfoParser.encodeAdditionalInfoList(nettyBuffer, additionalInfoList);
+
+            // 将Netty ByteBuf转换为Vert.x Buffer
+            byte[] additionalData = new byte[nettyBuffer.readableBytes()];
+            nettyBuffer.readBytes(additionalData);
+            buffer.appendBytes(additionalData);
+            nettyBuffer.release();
+        } else if (additionalInfo != null && additionalInfo.length() > 0) {
+            // 兼容旧版本：使用原始附加信息数据
             buffer.appendBuffer(additionalInfo);
         }
         
@@ -167,8 +184,26 @@ public class T0200LocationReport extends JT808Message {
         // 附加信息 (剩余字节)
         if (index < body.length()) {
             additionalInfo = body.getBuffer(index, body.length());
-            // 延迟解析：不在此处立即解析，等到需要时再解析
+
+            // 使用新的附加信息解析器
+            try {
+                // 将Vert.x Buffer转换为Netty ByteBuf
+                byte[] additionalData = additionalInfo.getBytes();
+                io.netty.buffer.ByteBuf nettyBuffer = io.netty.buffer.Unpooled.wrappedBuffer(additionalData);
+
+                // 解析附加信息列表
+                additionalInfoList = AdditionalInfoParser.parseAdditionalInfoList(nettyBuffer, additionalData.length);
+
+                nettyBuffer.release();
+            } catch (Exception e) {
+                System.err.println("解析附加信息时发生错误: " + e.getMessage());
+                additionalInfoList = new ArrayList<>();
+            }
+
+            // 延迟解析：不在此处立即解析旧格式，等到需要时再解析
             parsedAdditionalInfo = null;
+        } else {
+            additionalInfoList = new ArrayList<>();
         }
     }
     
@@ -287,6 +322,84 @@ public class T0200LocationReport extends JT808Message {
         this.additionalInfo = additionalInfo;
         // 延迟解析：标记为未解析状态，只有在需要时才解析
         this.parsedAdditionalInfo = null;
+        this.additionalInfoList = new ArrayList<>();
+    }
+
+    /**
+     * 获取附加信息列表（新版本）
+     *
+     * @return 附加信息列表
+     */
+    public List<AdditionalInfo> getAdditionalInfoList() {
+        return additionalInfoList;
+    }
+
+    /**
+     * 设置附加信息列表（新版本）
+     *
+     * @param additionalInfoList 附加信息列表
+     */
+    public void setAdditionalInfoList(List<AdditionalInfo> additionalInfoList) {
+        this.additionalInfoList = additionalInfoList != null ? additionalInfoList : new ArrayList<>();
+        // 清除旧版本的解析结果
+        this.parsedAdditionalInfo = null;
+    }
+
+    /**
+     * 添加附加信息
+     *
+     * @param additionalInfo 附加信息
+     */
+    public void addAdditionalInfo(AdditionalInfo additionalInfo) {
+        if (this.additionalInfoList == null) {
+            this.additionalInfoList = new ArrayList<>();
+        }
+        this.additionalInfoList.add(additionalInfo);
+        // 清除旧版本的解析结果
+        this.parsedAdditionalInfo = null;
+    }
+
+    /**
+     * 根据ID获取附加信息
+     *
+     * @param id 附加信息ID
+     * @return 附加信息，如果不存在则返回null
+     */
+    public AdditionalInfo getAdditionalInfoById(int id) {
+        if (additionalInfoList == null) {
+            return null;
+        }
+        return additionalInfoList.stream()
+                .filter(info -> info.getId() == id)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * 根据类型获取附加信息
+     *
+     * @param clazz 附加信息类型
+     * @param <T>   附加信息类型
+     * @return 附加信息，如果不存在则返回null
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends AdditionalInfo> T getAdditionalInfoByType(Class<T> clazz) {
+        if (additionalInfoList == null) {
+            return null;
+        }
+        return (T) additionalInfoList.stream()
+                .filter(clazz::isInstance)
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * 获取附加信息的格式化字符串
+     *
+     * @return 格式化字符串
+     */
+    public String getAdditionalInfoDescription() {
+        return AdditionalInfoParser.formatAdditionalInfoList(additionalInfoList);
     }
 
     public Map<Integer, Object> getParsedAdditionalInfo() {
@@ -953,10 +1066,18 @@ public class T0200LocationReport extends JT808Message {
         
         // 附加信息
         sb.append("  附加信息: ").append(additionalInfo != null ? additionalInfo.length() + " bytes" : "无").append("\n");
-        
-        // 解析后的附加信息
-        if (parsedAdditionalInfo != null && !parsedAdditionalInfo.isEmpty()) {
+
+        // 解析后的附加信息（使用新的架构）
+        if (additionalInfoList != null && !additionalInfoList.isEmpty()) {
             sb.append("  解析后的附加信息: \n");
+            for (AdditionalInfo info : additionalInfoList) {
+                sb.append("    ID 0x").append(String.format("%02X", info.getId()))
+                        .append(" (").append(info.getDescription()).append("): ")
+                        .append(info.toString()).append("\n");
+            }
+        } else if (parsedAdditionalInfo != null && !parsedAdditionalInfo.isEmpty()) {
+            // 兼容旧版本的解析结果
+            sb.append("  解析后的附加信息 (旧版本): \n");
             for (Map.Entry<Integer, Object> entry : parsedAdditionalInfo.entrySet()) {
                 int id = entry.getKey();
                 Object value = entry.getValue();
@@ -980,7 +1101,7 @@ public class T0200LocationReport extends JT808Message {
             case 0x01 -> "里程";
             case 0x02 -> "油量";
             case 0x03 -> "行驶记录速度";
-            case 0x04 -> "报警事件ID";
+            case 0x04 -> "人工确认报警事件ID";
             case 0x11 -> "超速报警附加信息";
             case 0x12 -> "进出区域/路线报警附加信息";
             case 0x13 -> "路段行驶时间报警附加信息";
@@ -1123,5 +1244,161 @@ public class T0200LocationReport extends JT808Message {
             case "sleep" -> "休眠";
             default -> key;
         };
+    }
+
+    // ==================== 新架构的便利方法 ====================
+
+    /**
+     * 获取里程信息
+     *
+     * @return 里程值（单位：km），如果不存在则返回null
+     */
+    public Double getMileage() {
+        MileageInfo info = getAdditionalInfoByType(MileageInfo.class);
+        return info != null ? info.getMileageKm() : null;
+    }
+
+    /**
+     * 获取油量信息
+     *
+     * @return 油量值（单位：L），如果不存在则返回null
+     */
+    public Double getFuelLevel() {
+        FuelInfo info = getAdditionalInfoByType(FuelInfo.class);
+        return info != null ? info.getFuelL() : null;
+    }
+
+    /**
+     * 获取行驶记录速度信息
+     *
+     * @return 速度值（单位：km/h），如果不存在则返回null
+     */
+    public Double getRecordSpeed() {
+        RecordSpeedInfo info = getAdditionalInfoByType(RecordSpeedInfo.class);
+        return info != null ? info.getSpeedKmh() : null;
+    }
+
+    /**
+     * 获取人工确认报警事件ID
+     *
+     * @return 报警事件ID，如果不存在则返回null
+     */
+    public Integer getManualAlarmEventId() {
+        ManualAlarmEventInfo info = getAdditionalInfoByType(ManualAlarmEventInfo.class);
+        return info != null ? info.getEventId() : null;
+    }
+
+    /**
+     * 获取超速报警信息
+     *
+     * @return 超速报警信息，如果不存在则返回null
+     */
+    public OverspeedAlarmInfo getOverspeedAlarmInfo() {
+        return getAdditionalInfoByType(OverspeedAlarmInfo.class);
+    }
+
+    /**
+     * 获取进出区域/路线报警信息
+     *
+     * @return 进出区域/路线报警信息，如果不存在则返回null
+     */
+    public AreaRouteAlarmInfo getAreaRouteAlarmInfo() {
+        return getAdditionalInfoByType(AreaRouteAlarmInfo.class);
+    }
+
+    /**
+     * 获取路段行驶时间报警信息
+     *
+     * @return 路段行驶时间报警信息，如果不存在则返回null
+     */
+    public RouteTimeAlarmInfo getRouteTimeAlarmInfo() {
+        return getAdditionalInfoByType(RouteTimeAlarmInfo.class);
+    }
+
+    /**
+     * 获取IO状态信息
+     *
+     * @return IO状态信息，如果不存在则返回null
+     */
+    public IOStatusInfo getIOStatusInfo() {
+        return getAdditionalInfoByType(IOStatusInfo.class);
+    }
+
+    /**
+     * 获取模拟量信息
+     *
+     * @return 模拟量信息，如果不存在则返回null
+     */
+    public AnalogQuantityInfo getAnalogQuantityInfo() {
+        return getAdditionalInfoByType(AnalogQuantityInfo.class);
+    }
+
+    /**
+     * 获取无线通信网络信号强度
+     *
+     * @return 信号强度值（单位：dBm），如果不存在则返回null
+     */
+    public Integer getSignalStrength() {
+        SignalStrengthInfo info = getAdditionalInfoByType(SignalStrengthInfo.class);
+        return info != null ? info.getSignalStrength() : null;
+    }
+
+    /**
+     * 获取GNSS定位卫星数
+     *
+     * @return 卫星数量，如果不存在则返回null
+     */
+    public Integer getSatelliteCount() {
+        SatelliteCountInfo info = getAdditionalInfoByType(SatelliteCountInfo.class);
+        return info != null ? info.getSatelliteCount() : null;
+    }
+
+    /**
+     * 检查是否存在指定类型的附加信息
+     *
+     * @param clazz 附加信息类型
+     * @return 如果存在则返回true，否则返回false
+     */
+    public boolean hasAdditionalInfo(Class<? extends AdditionalInfo> clazz) {
+        return getAdditionalInfoByType(clazz) != null;
+    }
+
+    /**
+     * 移除指定类型的附加信息
+     *
+     * @param clazz 附加信息类型
+     * @return 如果成功移除则返回true，否则返回false
+     */
+    public boolean removeAdditionalInfo(Class<? extends AdditionalInfo> clazz) {
+        if (additionalInfoList == null) {
+            return false;
+        }
+        return additionalInfoList.removeIf(info -> clazz.isInstance(info));
+    }
+
+    /**
+     * 移除指定ID的附加信息
+     *
+     * @param id 附加信息ID
+     * @return 如果成功移除则返回true，否则返回false
+     */
+    public boolean removeAdditionalInfoById(int id) {
+        if (additionalInfoList == null) {
+            return false;
+        }
+        return additionalInfoList.removeIf(info -> info.getId() == id);
+    }
+
+    /**
+     * 清空所有附加信息
+     */
+    public void clearAdditionalInfo() {
+        if (additionalInfoList != null) {
+            additionalInfoList.clear();
+        }
+        if (parsedAdditionalInfo != null) {
+            parsedAdditionalInfo.clear();
+        }
+        additionalInfo = null;
     }
 }
