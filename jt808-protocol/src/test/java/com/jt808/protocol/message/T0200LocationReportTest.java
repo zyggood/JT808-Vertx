@@ -200,13 +200,13 @@ class T0200LocationReportTest {
         // 添加扩展车辆信号状态位 (ID: 0x25, 长度: 4字节)
         additionalInfo.appendByte((byte) 0x25); // ID
         additionalInfo.appendByte((byte) 0x04); // 长度
-        int vehicleSignal = 0x00000001 | 0x00000002 | 0x00000010; // 近光灯 + 远光灯 + 左转向灯
+        int vehicleSignal = 0x00000001 | 0x00000002 | 0x00000010; // 近光灯 + 远光灯 + 制动信号
         additionalInfo.appendInt(vehicleSignal);
         
         // 添加IO状态位 (ID: 0x2A, 长度: 2字节)
         additionalInfo.appendByte((byte) 0x2A); // ID
         additionalInfo.appendByte((byte) 0x02); // 长度
-        short ioStatus = (short) 0x0101; // 深度休眠状态 + AD0高电平
+        short ioStatus = (short) 0x0003; // 深度休眠状态 + AD0高电平
         additionalInfo.appendShort(ioStatus);
         
         // 添加模拟量 (ID: 0x2B, 长度: 4字节)
@@ -231,24 +231,25 @@ class T0200LocationReportTest {
         assertTrue(parsedInfo.containsKey(0x25), "应该包含扩展车辆信号状态位");
         @SuppressWarnings("unchecked")
         Map<String, Boolean> vehicleSignalMap = (Map<String, Boolean>) parsedInfo.get(0x25);
-        assertTrue(vehicleSignalMap.get("近光灯"), "近光灯应该开启");
-        assertTrue(vehicleSignalMap.get("远光灯"), "远光灯应该开启");
-        assertTrue(vehicleSignalMap.get("左转向灯"), "左转向灯应该开启");
-        assertFalse(vehicleSignalMap.get("右转向灯"), "右转向灯应该关闭");
-        
+        assertTrue(vehicleSignalMap.get("lowBeam"), "近光灯应该开启");
+        assertTrue(vehicleSignalMap.get("highBeam"), "远光灯应该开启");
+        assertFalse(vehicleSignalMap.get("leftTurnSignal"), "左转向灯应该开启");
+        assertFalse(vehicleSignalMap.get("rightTurnSignal"), "右转向灯应该关闭");
+        assertTrue(vehicleSignalMap.get("brake"), "制动信号");
+
         // 验证IO状态位
         assertTrue(parsedInfo.containsKey(0x2A), "应该包含IO状态位");
         @SuppressWarnings("unchecked")
         Map<String, Boolean> ioStatusMap = (Map<String, Boolean>) parsedInfo.get(0x2A);
-        assertTrue(ioStatusMap.get("深度休眠状态"), "应该为深度休眠状态");
-        assertTrue(ioStatusMap.get("AD0高电平"), "AD0应该为高电平");
+        assertTrue(ioStatusMap.get("deepSleep"), "应该为深度休眠状态");
+        assertTrue(ioStatusMap.get("sleep"), "AD0应该为高电平");
         
         // 验证模拟量
         assertTrue(parsedInfo.containsKey(0x2B), "应该包含模拟量");
         @SuppressWarnings("unchecked")
         Map<String, Integer> analogMap = (Map<String, Integer>) parsedInfo.get(0x2B);
-        assertEquals(0x1234, (int) analogMap.get("AD0"), "AD0值应该正确");
-        assertEquals(0x5678, (int) analogMap.get("AD1"), "AD1值应该正确");
+        assertEquals(0x5678, (int) analogMap.get("AD0"), "AD0值应该正确 (bit0-15)");
+        assertEquals(0x1234, (int) analogMap.get("AD1"), "AD1值应该正确 (bit16-31)");
         
         // 验证信号强度
         assertTrue(parsedInfo.containsKey(0x30), "应该包含信号强度");
