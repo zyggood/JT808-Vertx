@@ -60,6 +60,9 @@ class JT808MessageFactoryTest {
 
         JT808Message message9 = factory.createMessage(0x8302);
         assertInstanceOf(T8302QuestionDistribution.class, message9);
+
+        JT808Message message10 = factory.createMessage(0x8303);
+        assertInstanceOf(T8303InfoMenuSetting.class, message10);
     }
 
     @Test
@@ -80,6 +83,7 @@ class JT808MessageFactoryTest {
         assertTrue(factory.isSupported(0x8001));
         assertTrue(factory.isSupported(0x8100));
         assertTrue(factory.isSupported(0x8302));
+        assertTrue(factory.isSupported(0x8303));
 
         assertFalse(factory.isSupported(0x9999));
     }
@@ -98,6 +102,7 @@ class JT808MessageFactoryTest {
         assertTrue(supportedIds.contains(0x8001));
         assertTrue(supportedIds.contains(0x8100));
         assertTrue(supportedIds.contains(0x8302));
+        assertTrue(supportedIds.contains(0x8303));
 
         assertFalse(supportedIds.contains(0x9999));
     }
@@ -221,6 +226,59 @@ class JT808MessageFactoryTest {
                 "普通提问", new java.util.ArrayList<>(), false, true);
         assertEquals(0x8302, normalQuestion.getMessageId(), "普通提问消息ID应正确");
         assertFalse(normalQuestion.isEmergency(), "应为普通提问");
+    }
+
+    @Test
+    @DisplayName("测试T8303信息点播菜单设置消息工厂支持")
+    void testT8303InfoMenuSettingFactory() {
+        // 测试创建 T8303InfoMenuSetting 消息
+        JT808Message message = factory.createMessage(0x8303);
+
+        assertNotNull(message, "消息不应为空");
+        assertInstanceOf(T8303InfoMenuSetting.class, message, "消息应为 T8303InfoMenuSetting 类型");
+        assertEquals(0x8303, message.getMessageId(), "消息ID应为 0x8303");
+
+        // 测试消息功能
+        T8303InfoMenuSetting menuMsg = (T8303InfoMenuSetting) message;
+        menuMsg.setSettingType(T8303InfoMenuSetting.SettingType.UPDATE);
+        menuMsg.addInfoItem((byte) 1, "天气预报");
+        menuMsg.addInfoItem((byte) 2, "交通信息");
+
+        assertEquals(T8303InfoMenuSetting.SettingType.UPDATE, menuMsg.getSettingType(), "设置类型应正确设置");
+        assertEquals(2, menuMsg.getInfoItems().size(), "信息项列表大小应正确");
+        assertTrue(menuMsg.isUpdate(), "应为更新菜单类型");
+
+        // 测试编码
+        Buffer encoded = menuMsg.encodeBody();
+        assertNotNull(encoded, "编码结果不应为空");
+        assertTrue(encoded.length() > 0, "编码后长度应大于0");
+
+        // 测试创建多个实例
+        T8303InfoMenuSetting menu1 = (T8303InfoMenuSetting) factory.createMessage(0x8303);
+        T8303InfoMenuSetting menu2 = (T8303InfoMenuSetting) factory.createMessage(0x8303);
+        assertNotSame(menu1, menu2, "每次创建应返回新的实例");
+
+        // 测试不同类型的菜单设置
+        T8303InfoMenuSetting deleteAll = T8303InfoMenuSetting.createDeleteAll();
+        assertEquals(0x8303, deleteAll.getMessageId(), "删除全部消息ID应正确");
+        assertTrue(deleteAll.isDeleteAll(), "应为删除全部类型");
+
+        java.util.List<T8303InfoMenuSetting.InfoItem> items = new java.util.ArrayList<>();
+        items.add(new T8303InfoMenuSetting.InfoItem((byte) 1, "新闻资讯"));
+        items.add(new T8303InfoMenuSetting.InfoItem((byte) 2, "股票行情"));
+
+        T8303InfoMenuSetting updateMenu = T8303InfoMenuSetting.createUpdate(items);
+        assertEquals(0x8303, updateMenu.getMessageId(), "更新菜单消息ID应正确");
+        assertTrue(updateMenu.isUpdate(), "应为更新菜单类型");
+        assertEquals(2, updateMenu.getInfoItems().size(), "信息项数量应正确");
+
+        T8303InfoMenuSetting appendMenu = T8303InfoMenuSetting.createAppend(items);
+        assertEquals(0x8303, appendMenu.getMessageId(), "追加菜单消息ID应正确");
+        assertTrue(appendMenu.isAppend(), "应为追加菜单类型");
+
+        T8303InfoMenuSetting modifyMenu = T8303InfoMenuSetting.createModify(items);
+        assertEquals(0x8303, modifyMenu.getMessageId(), "修改菜单消息ID应正确");
+        assertTrue(modifyMenu.isModify(), "应为修改菜单类型");
     }
 
     /**
