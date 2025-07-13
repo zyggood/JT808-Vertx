@@ -66,6 +66,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8203, T8203ManualAlarmConfirmation::new);
         messageCreators.put(0x8300, T8300TextInfoDistribution::new);
         messageCreators.put(0x8301, T8301EventSetting::new);
+        messageCreators.put(0x8302, T8302QuestionDistribution::new);
     }
 
     /**

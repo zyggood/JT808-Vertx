@@ -57,6 +57,9 @@ class JT808MessageFactoryTest {
 
         JT808Message message8 = factory.createMessage(0x8100);
         assertInstanceOf(T8100TerminalRegisterResponse.class, message8);
+
+        JT808Message message9 = factory.createMessage(0x8302);
+        assertInstanceOf(T8302QuestionDistribution.class, message9);
     }
 
     @Test
@@ -76,6 +79,7 @@ class JT808MessageFactoryTest {
         assertTrue(factory.isSupported(0x0301));
         assertTrue(factory.isSupported(0x8001));
         assertTrue(factory.isSupported(0x8100));
+        assertTrue(factory.isSupported(0x8302));
 
         assertFalse(factory.isSupported(0x9999));
     }
@@ -93,6 +97,7 @@ class JT808MessageFactoryTest {
         assertTrue(supportedIds.contains(0x0301));
         assertTrue(supportedIds.contains(0x8001));
         assertTrue(supportedIds.contains(0x8100));
+        assertTrue(supportedIds.contains(0x8302));
 
         assertFalse(supportedIds.contains(0x9999));
     }
@@ -174,6 +179,48 @@ class JT808MessageFactoryTest {
         T0301EventReport report1 = (T0301EventReport) factory.createMessage(0x0301);
         T0301EventReport report2 = (T0301EventReport) factory.createMessage(0x0301);
         assertNotSame(report1, report2, "每次创建应返回新的实例");
+    }
+
+    @Test
+    @DisplayName("测试T8302提问下发消息工厂支持")
+    void testT8302QuestionDistributionFactory() {
+        // 测试创建 T8302QuestionDistribution 消息
+        JT808Message message = factory.createMessage(0x8302);
+
+        assertNotNull(message, "消息不应为空");
+        assertInstanceOf(T8302QuestionDistribution.class, message, "消息应为 T8302QuestionDistribution 类型");
+        assertEquals(0x8302, message.getMessageId(), "消息ID应为 0x8302");
+
+        // 测试消息功能
+        T8302QuestionDistribution questionMsg = (T8302QuestionDistribution) message;
+        questionMsg.setQuestionFlag((byte) 0x01);
+        questionMsg.setQuestionContent("测试问题");
+        questionMsg.addAnswer((byte) 1, "答案1");
+
+        assertEquals((byte) 0x01, questionMsg.getQuestionFlag(), "提问标志应正确设置");
+        assertEquals("测试问题", questionMsg.getQuestionContent(), "问题内容应正确设置");
+        assertEquals(1, questionMsg.getAnswerList().size(), "答案列表大小应正确");
+
+        // 测试编码
+        Buffer encoded = questionMsg.encodeBody();
+        assertNotNull(encoded, "编码结果不应为空");
+        assertTrue(encoded.length() > 0, "编码后长度应大于0");
+
+        // 测试创建多个实例
+        T8302QuestionDistribution question1 = (T8302QuestionDistribution) factory.createMessage(0x8302);
+        T8302QuestionDistribution question2 = (T8302QuestionDistribution) factory.createMessage(0x8302);
+        assertNotSame(question1, question2, "每次创建应返回新的实例");
+
+        // 测试不同类型的提问
+        T8302QuestionDistribution emergencyQuestion = T8302QuestionDistribution.createEmergencyQuestion(
+                "紧急提问", new java.util.ArrayList<>(), true, false);
+        assertEquals(0x8302, emergencyQuestion.getMessageId(), "紧急提问消息ID应正确");
+        assertTrue(emergencyQuestion.isEmergency(), "应为紧急提问");
+
+        T8302QuestionDistribution normalQuestion = T8302QuestionDistribution.createNormalQuestion(
+                "普通提问", new java.util.ArrayList<>(), false, true);
+        assertEquals(0x8302, normalQuestion.getMessageId(), "普通提问消息ID应正确");
+        assertFalse(normalQuestion.isEmergency(), "应为普通提问");
     }
 
     /**
