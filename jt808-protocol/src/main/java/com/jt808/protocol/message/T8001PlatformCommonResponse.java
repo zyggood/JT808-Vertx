@@ -8,6 +8,8 @@ import io.vertx.core.buffer.Buffer;
  */
 public class T8001PlatformCommonResponse extends JT808Message {
 
+    public static final int MESSAGE_ID = 0x8001;
+
     // 结果常量定义
     public static final byte RESULT_SUCCESS = 0x00;           // 成功/确认
     public static final byte RESULT_FAILURE = 0x01;           // 失败
@@ -71,7 +73,7 @@ public class T8001PlatformCommonResponse extends JT808Message {
 
     @Override
     public int getMessageId() {
-        return 0x8001;
+        return MESSAGE_ID;
     }
 
     @Override
