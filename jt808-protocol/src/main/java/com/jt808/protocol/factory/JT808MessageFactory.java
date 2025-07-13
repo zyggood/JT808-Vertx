@@ -50,6 +50,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x0200, T0200LocationReport::new);
         messageCreators.put(0x0201, T0201PositionInfoQueryResponse::new);
         messageCreators.put(0x0301, T0301EventReport::new);
+        messageCreators.put(0x0303, T0303InfoDemandCancel::new);
         messageCreators.put(0x8201, T8201PositionInfoQuery::new);
         messageCreators.put(0x8202, T8202TemporaryLocationTrackingControl::new);
 
