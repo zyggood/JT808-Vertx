@@ -198,6 +198,28 @@ response.setLocationReport(null);
 - 保持向后兼容性，API接口不变
 **测试验证**: 通过 `LazyParsingTest` 验证延迟解析的正确性和性能
 
+### 10. T0301 事件报告消息实现经验
+
+**需求**: 实现消息ID为 0x0301 的事件报告消息，消息体只包含1字节的事件ID
+**实现要点**:
+
+- 消息体结构简单：仅包含1字节事件ID (BYTE类型)
+- 提供无符号值获取方法 `getEventIdUnsigned()` 处理字节的符号扩展问题
+- 静态工厂方法支持常见事件类型（紧急报警、故障报警等）
+- 完整的编解码实现，包括边界值测试（0x00, 0xFF）
+  **集成要点**:
+- 在 `JT808Decoder.createMessage()` 中添加 0x0301 消息支持
+- 在 `JT808MessageFactory.initMessageCreators()` 中注册消息创建器
+- 消息工厂测试验证创建、编解码和集成功能
+  **文件清单**:
+- `T0301EventReport.java` - 消息实现
+- `T0301EventReportTest.java` - 单元测试
+- `T0301EventReportExample.java` - 使用示例
+- `JT808Decoder.java` - 添加解码支持
+- `JT808MessageFactory.java` - 添加工厂支持
+- `JT808MessageFactoryTest.java` - 更新工厂测试
+  **协议关联**: 与 T8301 事件设置消息配对使用，实现事件的预设和报告机制
+
 ## 编码规范约束
 
 ### 1. 包命名规范

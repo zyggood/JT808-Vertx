@@ -197,6 +197,8 @@ public class JT808Decoder {
                 return new T0107QueryTerminalPropertyResponse();
             case 0x0200: // 位置信息汇报
                 return new T0200LocationReport();
+            case 0x0301: // 事件报告
+                return new T0301EventReport();
             case 0x8001: // 平台通用应答
                 return new T8001PlatformCommonResponse();
             case 0x8100: // 终端注册应答

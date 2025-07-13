@@ -48,12 +48,15 @@ class JT808MessageFactoryTest {
         JT808Message message5 = factory.createMessage(0x0200);
         assertInstanceOf(T0200LocationReport.class, message5);
 
-        // 测试平台消息
-        JT808Message message6 = factory.createMessage(0x8001);
-        assertInstanceOf(T8001PlatformCommonResponse.class, message6);
+        JT808Message message6 = factory.createMessage(0x0301);
+        assertInstanceOf(T0301EventReport.class, message6);
 
-        JT808Message message7 = factory.createMessage(0x8100);
-        assertInstanceOf(T8100TerminalRegisterResponse.class, message7);
+        // 测试平台消息
+        JT808Message message7 = factory.createMessage(0x8001);
+        assertInstanceOf(T8001PlatformCommonResponse.class, message7);
+
+        JT808Message message8 = factory.createMessage(0x8100);
+        assertInstanceOf(T8100TerminalRegisterResponse.class, message8);
     }
 
     @Test
@@ -70,6 +73,7 @@ class JT808MessageFactoryTest {
         assertTrue(factory.isSupported(0x0001));
         assertTrue(factory.isSupported(0x0002));
         assertTrue(factory.isSupported(0x0100));
+        assertTrue(factory.isSupported(0x0301));
         assertTrue(factory.isSupported(0x8001));
         assertTrue(factory.isSupported(0x8100));
 
@@ -86,6 +90,7 @@ class JT808MessageFactoryTest {
         assertTrue(supportedIds.contains(0x0100));
         assertTrue(supportedIds.contains(0x0102));
         assertTrue(supportedIds.contains(0x0200));
+        assertTrue(supportedIds.contains(0x0301));
         assertTrue(supportedIds.contains(0x8001));
         assertTrue(supportedIds.contains(0x8100));
 
@@ -142,6 +147,33 @@ class JT808MessageFactoryTest {
         assertEquals(0, encoded.length());
 
         assertNull(message.getBodyData());
+    }
+
+    @Test
+    @DisplayName("测试T0301事件报告消息工厂支持")
+    void testT0301EventReportFactory() {
+        // 测试创建 T0301EventReport 消息
+        JT808Message message = factory.createMessage(0x0301);
+
+        assertNotNull(message, "消息不应为空");
+        assertInstanceOf(T0301EventReport.class, message, "消息应为 T0301EventReport 类型");
+        assertEquals(0x0301, message.getMessageId(), "消息ID应为 0x0301");
+
+        // 测试消息功能
+        T0301EventReport eventReport = (T0301EventReport) message;
+        eventReport.setEventId((byte) 0x01);
+        assertEquals(0x01, eventReport.getEventIdUnsigned(), "事件ID应正确设置");
+
+        // 测试编码
+        Buffer encoded = eventReport.encodeBody();
+        assertNotNull(encoded, "编码结果不应为空");
+        assertEquals(1, encoded.length(), "编码后长度应为1字节");
+        assertEquals(0x01, encoded.getByte(0), "编码后的事件ID应正确");
+
+        // 测试创建多个实例
+        T0301EventReport report1 = (T0301EventReport) factory.createMessage(0x0301);
+        T0301EventReport report2 = (T0301EventReport) factory.createMessage(0x0301);
+        assertNotSame(report1, report2, "每次创建应返回新的实例");
     }
 
     /**
