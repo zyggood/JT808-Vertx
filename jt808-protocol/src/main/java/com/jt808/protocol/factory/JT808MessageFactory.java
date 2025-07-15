@@ -70,6 +70,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8302, T8302QuestionDistribution::new);
         messageCreators.put(0x8303, T8303InfoMenuSetting::new);
         messageCreators.put(0x8304, T8304InfoService::new);
+        messageCreators.put(0x8400, T8400PhoneCallback::new);
     }
 
     /**

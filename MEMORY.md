@@ -237,9 +237,88 @@ messageCreators.put(0x8304, T8304InfoService::new);
 5. **常量定义**: 定义信息类型常量，避免魔法数字
 6. **描述方法**: 提供人性化的类型描述，便于调试和日志输出
 
+## T8400 电话回拨消息实现经验
+
+### 消息特点
+- **消息ID**: 0x8400（平台消息）
+- **消息体结构**: 标志(BYTE) + 电话号码(STRING，最长20字节)
+- **编码方式**: GBK编码
+- **应用场景**: 平台向终端发起电话回拨指令
+
+### 实现要点
+
+#### 1. 消息结构设计
+```java
+public class T8400PhoneCallback extends JT808Message {
+    private byte flag;           // 0:普通通话；1:监听
+    private String phoneNumber;  // 电话号码，最长20字节
+}
+```
+
+#### 2. 静态工厂方法
+- `createNormalCall(String phoneNumber)`: 创建普通通话回拨
+- `createMonitorCall(String phoneNumber)`: 创建监听回拨
+
+#### 3. 标志常量定义
+```java
+public static class CallFlag {
+    public static final byte NORMAL_CALL = 0x00;  // 普通通话
+    public static final byte MONITOR = 0x01;       // 监听
+}
+```
+
+#### 4. 判断方法
+- `isNormalCall()`: 检查是否为普通通话
+- `isMonitor()`: 检查是否为监听
+- `getFlagDescription()`: 获取标志的文字描述
+
+#### 5. 长度限制处理
+- 电话号码最长20字节（GBK编码后）
+- 编码时进行长度验证，超长抛出异常
+- 支持空电话号码和null值处理
+
+#### 6. GBK编码处理
+- 编码：`phoneNumber.getBytes(Charset.forName("GBK"))`
+- 解码：`new String(phoneBytes, Charset.forName("GBK"))`
+
+#### 7. 无符号值获取
+- `getFlagUnsigned()`: 获取标志的无符号值，避免负数显示
+
+### 测试覆盖
+- ✅ 26个测试用例全部通过
+- ✅ 消息ID验证
+- ✅ 构造函数测试（默认、带Header、带参数）
+- ✅ 静态工厂方法测试（2个工厂方法）
+- ✅ 编解码功能测试
+- ✅ 编解码一致性测试
+- ✅ 空/null电话号码处理测试
+- ✅ GBK编码处理测试
+- ✅ 长度限制测试（20字节边界、超长异常）
+- ✅ 无符号值获取测试
+- ✅ 标志常量和判断方法测试
+- ✅ 标志描述测试
+- ✅ toString、equals、hashCode测试
+- ✅ 异常处理测试
+- ✅ 消息工厂创建与支持测试
+- ✅ 实际使用场景测试（紧急呼叫、客服监听、手机回拨）
+
+### 消息工厂注册
+```java
+messageCreators.put(0x8400, T8400PhoneCallback::new);
+```
+
+### 教训总结
+1. **长度限制**: 严格控制电话号码长度不超过20字节，编码时验证
+2. **类型安全**: 提供静态工厂方法和标志判断方法，提高代码可读性
+3. **编码一致性**: 编码和解码都使用GBK编码，确保特殊字符正确处理
+4. **异常处理**: 完善的长度验证和空值处理，提供清晰的错误信息
+5. **常量定义**: 定义标志常量，避免魔法数字
+6. **描述方法**: 提供人性化的标志描述，便于调试和日志输出
+7. **边界测试**: 充分测试20字节边界情况和各种电话号码格式
+
 ## JT808消息添加标准化工作流程
 
-> **重要**: 基于T0201、T8202、T8203、T8300、T8301、T8302、T8303、T0303、T8304等消息的实现经验总结
+> **重要**: 基于T0201、T8202、T8203、T8300、T8301、T8302、T8303、T0303、T8304、T8400等消息的实现经验总结
 
 ### 消息添加完整清单
 
