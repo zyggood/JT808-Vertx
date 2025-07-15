@@ -122,9 +122,124 @@ EscapeUtils.escape(buffer);    // 编码时转义
 EscapeUtils.unescape(buffer);  // 解码时反转义
 ```
 
+## T8304 信息服务消息实现经验
+
+### 消息特点
+- **消息ID**: 0x8304
+- **消息方向**: 平台→终端
+- **消息体结构**: 信息类型(1字节) + 信息长度(2字节) + 信息内容(GBK编码)
+- **特殊处理**: GBK编码、长度自动计算、信息类型分类
+
+### 实现要点
+
+#### 1. 消息结构设计
+```java
+private byte infoType;        // 信息类型
+private int infoLength;       // 信息长度(自动计算)
+private String infoContent;   // 信息内容(GBK编码)
+```
+
+#### 2. 静态工厂方法
+- `createInfoService()`: 通用信息服务创建
+- `createNewsService()`: 新闻信息服务
+- `createWeatherService()`: 天气信息服务
+- `createTrafficService()`: 交通信息服务
+- `createStockService()`: 股票信息服务
+
+#### 3. 信息类型常量定义
+```java
+public static class InfoType {
+    public static final byte NEWS = 0x01;           // 新闻
+    public static final byte WEATHER = 0x02;        // 天气
+    public static final byte TRAFFIC = 0x03;        // 交通
+    public static final byte STOCK = 0x04;          // 股票
+    public static final byte LOTTERY = 0x05;        // 彩票
+    public static final byte ENTERTAINMENT = 0x06;  // 娱乐
+    public static final byte ADVERTISEMENT = 0x07;  // 广告
+    public static final byte OTHER = 0x08;          // 其他
+}
+```
+
+#### 4. 判断方法
+- `isNewsInfo()`: 检查是否为新闻信息
+- `isWeatherInfo()`: 检查是否为天气信息
+- `isTrafficInfo()`: 检查是否为交通信息
+- `isStockInfo()`: 检查是否为股票信息
+
+#### 5. 长度自动计算
+```java
+public void setInfoContent(String infoContent) {
+    this.infoContent = infoContent;
+    // 自动更新信息长度
+    if (infoContent != null) {
+        this.infoLength = infoContent.getBytes(Charset.forName("GBK")).length;
+    } else {
+        this.infoLength = 0;
+    }
+}
+```
+
+#### 6. GBK编码处理
+```java
+// 编码时
+byte[] contentBytes = infoContent.getBytes(Charset.forName("GBK"));
+buffer.appendUnsignedShort(contentBytes.length);
+buffer.appendBytes(contentBytes);
+
+// 解码时
+byte[] contentBytes = body.getBytes(index, index + infoLength);
+infoContent = new String(contentBytes, Charset.forName("GBK"));
+```
+
+#### 7. 类型描述方法
+```java
+public String getInfoTypeDescription() {
+    switch (infoType) {
+        case 0x01: return "新闻";
+        case 0x02: return "天气";
+        case 0x03: return "交通";
+        case 0x04: return "股票";
+        // ...
+        default: return "未知类型(" + getInfoTypeUnsigned() + ")";
+    }
+}
+```
+
+### 测试覆盖
+- ✅ 31个测试用例全部通过
+- ✅ 消息ID验证
+- ✅ 构造函数测试(默认、带Header、带参数)
+- ✅ 静态工厂方法测试(5个工厂方法)
+- ✅ 编解码功能测试
+- ✅ 编解码一致性测试
+- ✅ GBK编码处理测试
+- ✅ 空内容和null内容处理
+- ✅ 信息类型常量和判断方法测试
+- ✅ 类型描述方法测试
+- ✅ 无符号值获取测试
+- ✅ toString、equals、hashCode测试
+- ✅ 异常处理测试(空消息体、长度不足、长度不匹配)
+- ✅ 边界值测试(最大信息长度)
+- ✅ 消息工厂集成测试
+- ✅ 实际使用场景测试(新闻、天气、交通)
+- ✅ 自动长度更新测试
+
+### 消息工厂注册
+```java
+messageCreators.put(0x8304, T8304InfoService::new);
+```
+
+### 教训总结
+1. **长度自动计算**: 在setInfoContent方法中自动计算GBK编码后的字节长度，避免手动设置错误
+2. **类型安全**: 提供静态工厂方法和类型判断方法，提高代码可读性和类型安全
+3. **编码一致性**: 编码和解码都使用GBK编码，确保中文内容正确处理
+4. **异常处理**: 完善的长度验证和异常处理，提供清晰的错误信息
+5. **常量定义**: 定义信息类型常量，避免魔法数字
+6. **描述方法**: 提供人性化的类型描述，便于调试和日志输出
+
 ## JT808消息添加标准化工作流程
 
-> **重要**: 基于T0201、T8202、T8203、T8300、T8301、T8302、T8303、T0303等消息的实现经验总结
+> **重要**: 基于T0201、T8202、T8203、T8300、T8301、T8302、T8303、T0303、T8304等消息的实现经验总结
 
 ### 消息添加完整清单
 

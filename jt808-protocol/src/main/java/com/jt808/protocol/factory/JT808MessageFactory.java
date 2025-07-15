@@ -69,6 +69,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8301, T8301EventSetting::new);
         messageCreators.put(0x8302, T8302QuestionDistribution::new);
         messageCreators.put(0x8303, T8303InfoMenuSetting::new);
+        messageCreators.put(0x8304, T8304InfoService::new);
     }
 
     /**
