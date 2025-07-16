@@ -72,6 +72,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8304, T8304InfoService::new);
         messageCreators.put(0x8400, T8400PhoneCallback::new);
         messageCreators.put(0x8401, T8401PhonebookSetting::new);
+        messageCreators.put(0x8500, T8500VehicleControl::new);
     }
 
     /**
