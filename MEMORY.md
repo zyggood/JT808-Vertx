@@ -400,6 +400,7 @@ messageCreators.put(0x0500, T0500VehicleControlResponse::new);
 3. **T8203** - 人工确认报警消息
 4. **T8401** - 设置电话本消息
 5. **T8500** - 车辆控制消息
+6. **T8600** - 设置圆形区域消息
 
 ### 实现要点
 
@@ -455,6 +456,163 @@ messageCreators.put(0x8500, T8500VehicleControl::new);
 - 位操作判断要考虑保留位的影响
 - 消息体长度固定时要严格验证
 - 提供人性化的描述方法便于调试和理解
+
+## T8600 设置圆形区域消息实现经验
+
+### 消息特点
+- **消息ID**: 0x8600（平台消息）
+- **消息方向**: 平台→终端
+- **消息体结构**: 设置属性(BYTE) + 区域总数(BYTE) + 区域项列表
+- **区域项结构**: 区域ID(DWORD) + 区域属性(WORD) + 中心点纬度(DWORD) + 中心点经度(DWORD) + 半径(DWORD) + 起始时间(BCD[6]) + 结束时间(BCD[6]) + 最高速度(WORD) + 超速持续时间(BYTE)
+- **特殊处理**: BCD时间编码、坐标转换、速度单位处理
+- **应用场景**: 平台向终端设置圆形电子围栏区域
+
+### 实现要点
+
+#### 1. 消息结构设计
+```java
+public class T8600CircularAreaSetting extends JT808Message {
+    private byte settingAttribute;           // 设置属性
+    private byte areaCount;                  // 区域总数
+    private List<CircularArea> areas;        // 区域项列表
+}
+```
+
+#### 2. 静态工厂方法
+- `createUpdate(List<CircularArea> areas)`: 创建更新区域消息
+- `createAppend(List<CircularArea> areas)`: 创建追加区域消息
+- `createModify(List<CircularArea> areas)`: 创建修改区域消息
+- `createDeleteAll()`: 创建删除全部区域消息
+- `createDeleteSpecific(List<Long> areaIds)`: 创建删除指定区域消息
+
+#### 3. 设置属性常量定义
+```java
+public static class SettingAttribute {
+    public static final byte UPDATE = 0;           // 更新区域
+    public static final byte APPEND = 1;           // 追加区域
+    public static final byte MODIFY = 2;           // 修改区域
+    public static final byte DELETE_ALL = 3;       // 删除全部区域
+    public static final byte DELETE_SPECIFIC = 4;  // 删除指定区域
+}
+```
+
+#### 4. 区域属性位标志定义
+```java
+public static class AreaAttribute {
+    public static final int ENTRY_ALARM = 0x0001;      // 进入区域报警
+    public static final int EXIT_ALARM = 0x0002;       // 离开区域报警
+    public static final int NORTH_LATITUDE = 0x0004;   // 北纬
+    public static final int EAST_LONGITUDE = 0x0008;   // 东经
+    public static final int SPEED_LIMIT = 0x0010;      // 限速
+    public static final int TIME_LIMIT = 0x0020;       // 时间限制
+}
+```
+
+#### 5. 判断方法
+- `isUpdate()`: 检查是否为更新区域
+- `isAppend()`: 检查是否为追加区域
+- `isModify()`: 检查是否为修改区域
+- `isDeleteAll()`: 检查是否为删除全部区域
+- `isDeleteSpecific()`: 检查是否为删除指定区域
+
+#### 6. 区域管理方法
+- `addArea()`: 添加区域
+- `removeArea()`: 移除区域
+- `getArea()`: 根据ID获取区域
+- `clearAreas()`: 清空所有区域
+
+#### 7. BCD时间处理
+```java
+// BCD时间编码（YY-MM-DD-HH-MM-SS）
+public static byte[] encodeBcdTime(LocalDateTime dateTime) {
+    byte[] bcd = new byte[6];
+    bcd[0] = (byte) ((dateTime.getYear() % 100) / 10 * 16 + (dateTime.getYear() % 100) % 10);
+    bcd[1] = (byte) (dateTime.getMonthValue() / 10 * 16 + dateTime.getMonthValue() % 10);
+    bcd[2] = (byte) (dateTime.getDayOfMonth() / 10 * 16 + dateTime.getDayOfMonth() % 10);
+    bcd[3] = (byte) (dateTime.getHour() / 10 * 16 + dateTime.getHour() % 10);
+    bcd[4] = (byte) (dateTime.getMinute() / 10 * 16 + dateTime.getMinute() % 10);
+    bcd[5] = (byte) (dateTime.getSecond() / 10 * 16 + dateTime.getSecond() % 10);
+    return bcd;
+}
+
+// BCD时间解码
+public static LocalDateTime decodeBcdTime(byte[] bcd) {
+    int year = 2000 + (bcd[0] >> 4) * 10 + (bcd[0] & 0x0F);
+    int month = (bcd[1] >> 4) * 10 + (bcd[1] & 0x0F);
+    int day = (bcd[2] >> 4) * 10 + (bcd[2] & 0x0F);
+    int hour = (bcd[3] >> 4) * 10 + (bcd[3] & 0x0F);
+    int minute = (bcd[4] >> 4) * 10 + (bcd[4] & 0x0F);
+    int second = (bcd[5] >> 4) * 10 + (bcd[5] & 0x0F);
+    return LocalDateTime.of(year, month, day, hour, minute, second);
+}
+```
+
+#### 8. 坐标转换处理
+```java
+// 坐标转换（度 → 1/10^6度）
+public static long encodeCoordinate(double coordinate) {
+    return Math.round(coordinate * 1_000_000);
+}
+
+// 坐标转换（1/10^6度 → 度）
+public static double decodeCoordinate(long coordinate) {
+    return coordinate / 1_000_000.0;
+}
+```
+
+#### 9. 速度单位处理
+- 最高速度单位：km/h
+- 超速持续时间单位：秒
+- 半径单位：米
+
+#### 10. 删除指定区域处理
+```java
+// 删除指定区域时，消息体结构：设置属性 + 区域总数 + 区域ID列表
+public void encodeDeleteSpecific(Buffer buffer, List<Long> areaIds) {
+    buffer.appendByte(DELETE_SPECIFIC);
+    buffer.appendByte((byte) areaIds.size());
+    for (Long areaId : areaIds) {
+        buffer.appendUnsignedInt(areaId);
+    }
+}
+```
+
+### 测试覆盖
+- ✅ 35个测试用例全部通过
+- ✅ 消息ID验证
+- ✅ 构造函数测试（默认、带Header、带参数）
+- ✅ 静态工厂方法测试（5个工厂方法）
+- ✅ 编解码功能测试
+- ✅ 编解码一致性测试
+- ✅ 设置属性判断方法测试
+- ✅ 区域管理方法测试（添加、删除、查找、清空）
+- ✅ BCD时间编解码测试
+- ✅ 坐标转换测试
+- ✅ 区域属性位标志测试
+- ✅ 删除指定区域特殊处理测试
+- ✅ 删除全部区域特殊处理测试
+- ✅ toString、equals、hashCode测试
+- ✅ 异常处理测试（空消息体、长度不足、无效BCD时间）
+- ✅ 边界值测试（最大区域数、坐标边界、时间边界）
+- ✅ 消息工厂创建与支持测试
+- ✅ 实际使用场景测试（学校区域、工厂区域、限速区域）
+
+### 消息工厂注册
+```java
+messageCreators.put(0x8600, T8600CircularAreaSetting::new);
+```
+
+### 教训总结
+1. **BCD时间处理**: 需要正确处理BCD编码的时间格式，注意年份的2000年基准
+2. **坐标精度**: 坐标使用1/10^6度为单位，需要正确的转换和精度处理
+3. **可变消息体**: 不同设置属性对应不同的消息体结构，需要灵活处理
+4. **位标志处理**: 区域属性使用位标志，需要提供便捷的检查和设置方法
+5. **列表管理**: 提供高效的区域管理操作，支持添加、删除、查找
+6. **特殊类型处理**: 删除操作有特殊的消息体结构，需要单独处理
+7. **数据验证**: 严格验证坐标范围、时间有效性、速度合理性
+8. **类型安全**: 提供静态工厂方法和类型判断方法，提高代码可读性
+9. **异常处理**: 完善的数据验证和异常处理，提供清晰的错误信息
+10. **性能优化**: 合理使用数据结构，避免不必要的对象创建
 
 ## T8401 设置电话本消息实现经验
 
