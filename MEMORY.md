@@ -316,6 +316,74 @@ messageCreators.put(0x8400, T8400PhoneCallback::new);
 6. **描述方法**: 提供人性化的标志描述，便于调试和日志输出
 7. **边界测试**: 充分测试20字节边界情况和各种电话号码格式
 
+## T0500 车辆控制应答消息实现经验
+### 消息特点
+
+- **消息ID**: 0x0500
+- **消息方向**: 终端→平台
+- **消息体结构**: 应答流水号(2字节) + 位置信息汇报消息体(可选)
+- **应答流水号**: 对应的车辆控制消息的流水号
+- **特殊处理**: 可选位置信息、编解码处理
+
+### 实现要点
+
+#### 1. 消息结构设计
+```java
+public class T0500VehicleControlResponse extends JT808Message {
+    private int responseSerialNumber;      // 应答流水号
+    private T0200LocationReport locationReport;  // 位置信息汇报消息体
+}
+```
+
+#### 2. 静态工厂方法
+- `create(int responseSerialNumber, T0200LocationReport locationReport)`: 创建包含位置信息的应答
+- `create(int responseSerialNumber)`: 创建不包含位置信息的应答
+
+#### 3. 位置信息处理
+- `hasLocationReport()`: 检查是否包含位置信息
+- 支持可选的位置信息汇报消息体
+- 根据位置信息判断控制成功与否
+
+#### 4. 应答状态常量
+```java
+public static class ResponseStatus {
+    public static final String SUCCESS = "控制成功";
+    public static final String FAILURE = "控制失败";
+    public static final String TIMEOUT = "控制超时";
+    public static final String UNSUPPORTED = "不支持该控制";
+}
+```
+
+#### 5. 编解码处理
+- 应答流水号固定2字节编码
+- 位置信息可选编码
+- 严格的长度验证
+- 支持部分解码（仅应答流水号）
+
+#### 6. 无符号值处理
+- `getResponseSerialNumberUnsigned()`: 获取应答流水号的无符号值
+- 正确处理16位无符号整数
+
+#### 7. 描述方法
+- `getMessageDescription()`: 获取消息描述
+- `getResponseDescription()`: 根据位置信息获取应答状态描述
+
+### 测试覆盖
+- **测试用例**: 20个测试用例
+- **覆盖内容**: 消息ID、构造函数、静态工厂方法、编解码、位置信息处理、异常处理、工厂集成、真实场景等
+
+### 消息工厂注册
+```java
+messageCreators.put(0x0500, T0500VehicleControlResponse::new);
+```
+
+### 教训总结
+- 可选消息体需要灵活的编解码处理
+- 应答消息通常包含对应请求的流水号
+- 位置信息的存在表示控制操作的成功状态
+- 编解码时要考虑消息体的可变长度
+- 提供清晰的状态描述方法便于业务理解
+
 ## T8500 车辆控制消息实现经验
 ### 消息特点
 
@@ -328,9 +396,10 @@ messageCreators.put(0x8400, T8400PhoneCallback::new);
 ### 经验总结列表
 
 1. **T0200** - 位置信息汇报消息
-2. **T8203** - 人工确认报警消息
-3. **T8401** - 设置电话本消息
-4. **T8500** - 车辆控制消息
+2. **T0500** - 车辆控制应答消息
+3. **T8203** - 人工确认报警消息
+4. **T8401** - 设置电话本消息
+5. **T8500** - 车辆控制消息
 
 ### 实现要点
 
