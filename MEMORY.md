@@ -316,9 +316,119 @@ messageCreators.put(0x8400, T8400PhoneCallback::new);
 6. **描述方法**: 提供人性化的标志描述，便于调试和日志输出
 7. **边界测试**: 充分测试20字节边界情况和各种电话号码格式
 
+## T8401 设置电话本消息实现经验
+
+### 消息特点
+- **消息ID**: 0x8401（平台消息）
+- **消息体结构**: 设置类型(BYTE) + 联系人总数(BYTE) + 联系人项列表
+- **联系人项结构**: 标志(BYTE) + 号码长度(BYTE) + 电话号码(STRING) + 联系人长度(BYTE) + 联系人(STRING，GBK编码)
+- **编码方式**: 电话号码UTF-8编码，联系人姓名GBK编码
+- **应用场景**: 平台向终端设置电话本联系人信息
+
+### 实现要点
+
+#### 1. 消息结构设计
+```java
+public class T8401PhonebookSetting extends JT808Message {
+    private byte settingType;                    // 设置类型
+    private byte contactCount;                   // 联系人总数
+    private List<ContactItem> contactItems;     // 联系人项列表
+}
+```
+
+#### 2. 静态工厂方法
+- `createDeleteAll()`: 创建删除全部联系人消息
+- `createUpdate(List<ContactItem> contactItems)`: 创建更新电话本消息
+- `createAppend(List<ContactItem> contactItems)`: 创建追加电话本消息
+- `createModify(List<ContactItem> contactItems)`: 创建修改电话本消息
+
+#### 3. 设置类型常量定义
+```java
+public static class SettingType {
+    public static final byte DELETE_ALL = 0;  // 删除终端上所有存储的联系人
+    public static final byte UPDATE = 1;      // 更新电话本
+    public static final byte APPEND = 2;      // 追加电话本
+    public static final byte MODIFY = 3;      // 修改电话本
+}
+```
+
+#### 4. 联系人标志常量定义
+```java
+public static class ContactFlag {
+    public static final byte INCOMING = 1;        // 呼入
+    public static final byte OUTGOING = 2;        // 呼出
+    public static final byte BIDIRECTIONAL = 3;   // 呼入/呼出
+}
+```
+
+#### 5. 判断方法
+- `isDeleteAll()`: 检查是否为删除全部
+- `isUpdate()`: 检查是否为更新
+- `isAppend()`: 检查是否为追加
+- `isModify()`: 检查是否为修改
+
+#### 6. 联系人项管理
+- `addContactItem()`: 添加联系人项
+- `getContactItem()`: 根据电话号码查找联系人项
+- `removeContactItem()`: 根据电话号码移除联系人项
+- `clearContactItems()`: 清空所有联系人项
+
+#### 7. 长度限制处理
+- 电话号码最长255字节（UTF-8编码）
+- 联系人姓名最长255字节（GBK编码）
+- 超长时抛出异常
+
+#### 8. 编码处理
+- 电话号码使用UTF-8编码
+- 联系人姓名使用GBK编码
+- 正确处理中文字符的编解码
+
+#### 9. 可变长度列表处理
+- 删除全部类型时，消息体只包含设置类型字节
+- 其他类型需要包含联系人总数和联系人项列表
+- 编解码时正确处理列表长度和内容
+
+#### 10. 无符号值获取
+- `getContactCountUnsigned()`: 获取联系人总数的无符号值
+- `getFlagUnsigned()`: 获取标志的无符号值
+- 避免byte类型的负数问题
+
+### 测试覆盖
+- ✅ 42个测试用例全部通过
+- ✅ 消息ID验证
+- ✅ 构造函数测试（默认、带Header、带参数）
+- ✅ 静态工厂方法测试（4个工厂方法）
+- ✅ 编解码功能测试
+- ✅ 编解码一致性测试
+- ✅ 设置类型判断方法测试
+- ✅ 联系人项管理测试（添加、查找、删除、清空）
+- ✅ 长度限制测试（电话号码、联系人姓名边界）
+- ✅ 混合编码处理测试（UTF-8和GBK）
+- ✅ 删除全部类型特殊处理测试
+- ✅ 无符号值获取测试
+- ✅ toString、equals、hashCode测试
+- ✅ 异常处理测试（空消息体、长度不足、超长字段）
+- ✅ 消息工厂创建与支持测试
+- ✅ 实际使用场景测试（企业通讯录、紧急联系人、家庭电话本）
+
+### 消息工厂注册
+```java
+messageCreators.put(0x8401, T8401PhonebookSetting::new);
+```
+
+### 教训总结
+1. **可变长度列表**: 需要特别注意编解码的一致性和边界条件处理
+2. **混合编码**: 不同字段使用不同编码格式时要谨慎处理长度计算
+3. **内部类设计**: ContactItem内部类要提供完整的功能和便捷的操作方法
+4. **特殊类型处理**: 删除全部类型的特殊消息体结构要正确实现
+5. **列表管理**: 提供高效的联系人项查找、添加、删除操作
+6. **长度验证**: 严格控制字段长度，编码时进行验证
+7. **类型安全**: 提供静态工厂方法和类型判断方法，提高代码可读性
+8. **异常处理**: 完善的长度验证和空值处理，提供清晰的错误信息
+
 ## JT808消息添加标准化工作流程
 
-> **重要**: 基于T0201、T8202、T8203、T8300、T8301、T8302、T8303、T0303、T8304、T8400等消息的实现经验总结
+> **重要**: 基于T0201、T8202、T8203、T8300、T8301、T8302、T8303、T0303、T8304、T8400、T8401等消息的实现经验总结
 
 ### 消息添加完整清单
 
