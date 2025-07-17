@@ -77,6 +77,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8600, T8600SetCircularArea::new);
         messageCreators.put(0x8601, T8601DeleteCircularArea::new);
         messageCreators.put(0x8602, T8602SetRectangularArea::new);
+        messageCreators.put(0x8603, T8603DeleteRectangularArea::new);
     }
 
     /**
