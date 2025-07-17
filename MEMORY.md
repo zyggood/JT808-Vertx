@@ -401,6 +401,7 @@ messageCreators.put(0x0500, T0500VehicleControlResponse::new);
 4. **T8401** - 设置电话本消息
 5. **T8500** - 车辆控制消息
 6. **T8600** - 设置圆形区域消息
+7. **T8601** - 删除圆形区域消息
 
 ### 实现要点
 
@@ -613,6 +614,104 @@ messageCreators.put(0x8600, T8600CircularAreaSetting::new);
 8. **类型安全**: 提供静态工厂方法和类型判断方法，提高代码可读性
 9. **异常处理**: 完善的数据验证和异常处理，提供清晰的错误信息
 10. **性能优化**: 合理使用数据结构，避免不必要的对象创建
+
+## T8601 删除圆形区域消息实现经验
+
+### 消息特点
+- **消息ID**: 0x8601（平台消息）
+- **消息方向**: 平台→终端
+- **消息体结构**: 区域数(BYTE) + 区域ID列表(DWORD数组)
+- **特殊处理**: 可变长度区域ID列表、批量删除操作
+- **应用场景**: 平台向终端删除指定的圆形电子围栏区域
+
+### 实现要点
+
+#### 1. 消息结构设计
+```java
+public class T8601DeleteCircularArea extends JT808Message {
+    private byte areaCount;              // 区域数
+    private List<Long> areaIds;         // 区域ID列表
+}
+```
+
+#### 2. 静态工厂方法
+- `create(List<Long> areaIds)`: 创建删除指定区域消息
+- `create(Long... areaIds)`: 创建删除指定区域消息（可变参数）
+- `createSingle(Long areaId)`: 创建删除单个区域消息
+
+#### 3. 区域管理方法
+- `addAreaId(Long areaId)`: 添加区域ID
+- `removeAreaId(Long areaId)`: 移除区域ID
+- `containsAreaId(Long areaId)`: 检查是否包含指定区域ID
+- `clearAreaIds()`: 清空所有区域ID
+
+#### 4. 数据验证
+- 区域数量范围验证（0-255）
+- 区域ID有效性检查（非null、正数）
+- 列表一致性验证（区域数与列表大小匹配）
+
+#### 5. 编解码处理
+```java
+// 编码
+public Buffer encodeBody() {
+    Buffer buffer = Buffer.buffer();
+    buffer.appendByte(areaCount);
+    for (Long areaId : areaIds) {
+        buffer.appendUnsignedInt(areaId);
+    }
+    return buffer;
+}
+
+// 解码
+public void decodeBody(Buffer body) {
+    areaCount = body.getByte(0);
+    areaIds = new ArrayList<>();
+    for (int i = 0; i < getAreaCountUnsigned(); i++) {
+        long areaId = body.getUnsignedInt(1 + i * 4);
+        areaIds.add(areaId);
+    }
+}
+```
+
+#### 6. 无符号值处理
+- `getAreaCountUnsigned()`: 获取区域数的无符号值
+- 正确处理byte类型的无符号转换
+
+#### 7. 长度验证
+- 消息体最小长度：1字节（仅区域数）
+- 消息体长度计算：1 + 区域数 × 4字节
+- 严格验证消息体长度与区域数的一致性
+
+### 测试覆盖
+- ✅ 25个测试用例全部通过
+- ✅ 消息ID验证
+- ✅ 构造函数测试（默认、带Header、带参数）
+- ✅ 静态工厂方法测试（3个工厂方法）
+- ✅ 编解码功能测试
+- ✅ 编解码一致性测试
+- ✅ 区域管理方法测试（添加、删除、检查、清空）
+- ✅ 数据验证测试（区域数范围、ID有效性）
+- ✅ 无符号值获取测试
+- ✅ toString、equals、hashCode测试
+- ✅ 异常处理测试（空消息体、长度不足、长度不匹配）
+- ✅ 边界值测试（最大区域数、空列表）
+- ✅ 消息工厂创建与支持测试
+- ✅ 实际使用场景测试（单个删除、批量删除、清空操作）
+
+### 消息工厂注册
+```java
+messageCreators.put(0x8601, T8601DeleteCircularArea::new);
+```
+
+### 教训总结
+1. **可变长度列表**: 需要正确处理列表长度与消息体长度的对应关系
+2. **数据一致性**: 区域数字段必须与实际列表大小保持一致
+3. **批量操作**: 提供多种创建方式，支持单个和批量删除操作
+4. **长度验证**: 严格验证消息体长度，确保编解码的正确性
+5. **列表管理**: 提供便捷的区域ID管理方法，支持动态操作
+6. **类型安全**: 使用Long类型处理DWORD区域ID，避免溢出问题
+7. **异常处理**: 完善的数据验证和异常处理，提供清晰的错误信息
+8. **性能考虑**: 使用ArrayList实现，支持高效的随机访问和动态扩容
 
 ## T8401 设置电话本消息实现经验
 

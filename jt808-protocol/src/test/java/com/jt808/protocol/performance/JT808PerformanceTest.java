@@ -1,5 +1,6 @@
 package com.jt808.protocol.performance;
 
+import com.jt808.common.exception.ProtocolException;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
 import com.jt808.protocol.message.*;
