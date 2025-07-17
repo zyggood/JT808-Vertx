@@ -80,6 +80,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8603, T8603DeleteRectangularArea::new);
         messageCreators.put(0x8604, T8604SetPolygonArea::new);
         messageCreators.put(0x8605, T8605DeletePolygonArea::new);
+        messageCreators.put(0x8606, T8606SetRoute::new);
     }
 
     /**
