@@ -84,6 +84,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x8606, T8606SetRoute::new);
         messageCreators.put(0x8607, T8607DeleteRoute::new);
         messageCreators.put(0x8700, T8700DrivingRecordDataCollection::new);
+        messageCreators.put(0x8701, T8701DrivingRecordParameterTransmission::new);
     }
 
     /**
