@@ -75,6 +75,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x0500, T0500VehicleControlResponse::new);
         messageCreators.put(0x0700, T0700DrivingRecordDataUpload::new);
         messageCreators.put(0x0701, T0701ElectronicWaybillReport::new);
+        messageCreators.put(0x0702, T0702DriverIdentityInfoReport::new);
         messageCreators.put(0x8500, T8500VehicleControl::new);
         messageCreators.put(0x8600, T8600SetCircularArea::new);
         messageCreators.put(0x8601, T8601DeleteCircularArea::new);
