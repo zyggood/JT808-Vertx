@@ -4,6 +4,7 @@ import com.jt808.common.exception.ProtocolException;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
 import com.jt808.protocol.message.*;
+import com.jt808.protocol.message.T0705CanBusDataUpload;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -50,6 +51,7 @@ public class JT808MessageFactory {
         messageCreators.put(0x0200, T0200LocationReport::new);
         messageCreators.put(0x0201, T0201PositionInfoQueryResponse::new);
         messageCreators.put(0x0704, T0704LocationDataBatchUpload::new);
+        messageCreators.put(0x0705, T0705CanBusDataUpload::new);
         messageCreators.put(0x0301, T0301EventReport::new);
         messageCreators.put(0x0303, T0303InfoDemandCancel::new);
         messageCreators.put(0x8201, T8201PositionInfoQuery::new);
