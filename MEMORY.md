@@ -94,6 +94,12 @@ JT808MessageFactory factory = new JT808MessageFactory();
 JT808MessageFactory factory = JT808MessageFactory.getInstance();
 ```
 
+**重构优化 (2025-07-20)**:
+- 消息创建器初始化已拆分为3个方法：`initTerminalMessages()`、`initPlatformMessages()`、`initExtensionMessages()`
+- 引入 `MessageTypes` 常量类替代硬编码的消息ID
+- 按消息类型分组管理，提高代码可读性和维护性
+- 支持扩展消息类型的预留接口
+
 ### 2. 消息基类设计
 - **JT808Message**: 抽象基类，所有消息必须继承
 - **必须实现的抽象方法**:

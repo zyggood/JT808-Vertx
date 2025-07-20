@@ -3,6 +3,7 @@ package com.jt808.protocol.factory;
 import com.jt808.common.exception.ProtocolException;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
+import com.jt808.protocol.constants.MessageTypes;
 import com.jt808.protocol.message.*;
 import com.jt808.protocol.message.T0705CanBusDataUpload;
 import io.vertx.core.buffer.Buffer;
@@ -40,57 +41,78 @@ public class JT808MessageFactory {
      * 初始化消息创建器映射
      */
     private void initMessageCreators() {
-        // 终端消息
-        messageCreators.put(0x0001, T0001TerminalCommonResponse::new);
-        messageCreators.put(0x0002, T0002TerminalHeartbeat::new);
-        messageCreators.put(0x0100, T0100TerminalRegister::new);
-        messageCreators.put(0x0102, T0102TerminalAuth::new);
-        messageCreators.put(0x0104, T0104QueryTerminalParametersResponse::new);
-        messageCreators.put(0x0107, T0107QueryTerminalPropertyResponse::new);
-        messageCreators.put(0x0108, T0108TerminalUpgradeResultNotification::new);
-        messageCreators.put(0x0200, T0200LocationReport::new);
-        messageCreators.put(0x0201, T0201PositionInfoQueryResponse::new);
-        messageCreators.put(0x0704, T0704LocationDataBatchUpload::new);
-        messageCreators.put(0x0705, T0705CanBusDataUpload::new);
-        messageCreators.put(0x0301, T0301EventReport::new);
-        messageCreators.put(0x0303, T0303InfoDemandCancel::new);
-        messageCreators.put(0x8201, T8201PositionInfoQuery::new);
-        messageCreators.put(0x8202, T8202TemporaryLocationTrackingControl::new);
+        initTerminalMessages();
+        initPlatformMessages();
+        initExtensionMessages();
+    }
 
-        // 平台消息
-        messageCreators.put(0x8001, T8001PlatformCommonResponse::new);
-        messageCreators.put(0x8003, T8003ResendSubpackageRequest::new);
-        messageCreators.put(0x8100, T8100TerminalRegisterResponse::new);
-        messageCreators.put(0x8103, T8103TerminalParameterSetting::new);
-        messageCreators.put(0x8104, T8104QueryTerminalParameters::new);
-        messageCreators.put(0x8105, T8105TerminalControl::new);
-        messageCreators.put(0x8106, T8106QuerySpecificTerminalParameters::new);
-        messageCreators.put(0x8107, T8107QueryTerminalProperty::new);
-        messageCreators.put(0x8108, T8108TerminalUpgradePackage::new);
-        messageCreators.put(0x8203, T8203ManualAlarmConfirmation::new);
-        messageCreators.put(0x8300, T8300TextInfoDistribution::new);
-        messageCreators.put(0x8301, T8301EventSetting::new);
-        messageCreators.put(0x8302, T8302QuestionDistribution::new);
-        messageCreators.put(0x8303, T8303InfoMenuSetting::new);
-        messageCreators.put(0x8304, T8304InfoService::new);
-        messageCreators.put(0x8400, T8400PhoneCallback::new);
-        messageCreators.put(0x8401, T8401PhonebookSetting::new);
-        messageCreators.put(0x0500, T0500VehicleControlResponse::new);
-        messageCreators.put(0x0700, T0700DrivingRecordDataUpload::new);
-        messageCreators.put(0x0701, T0701ElectronicWaybillReport::new);
-        messageCreators.put(0x0702, T0702DriverIdentityInfoReport::new);
-        messageCreators.put(0x8500, T8500VehicleControl::new);
-        messageCreators.put(0x8600, T8600SetCircularArea::new);
-        messageCreators.put(0x8601, T8601DeleteCircularArea::new);
-        messageCreators.put(0x8602, T8602SetRectangularArea::new);
-        messageCreators.put(0x8603, T8603DeleteRectangularArea::new);
-        messageCreators.put(0x8604, T8604SetPolygonArea::new);
-        messageCreators.put(0x8605, T8605DeletePolygonArea::new);
-        messageCreators.put(0x8606, T8606SetRoute::new);
-        messageCreators.put(0x8607, T8607DeleteRoute::new);
-        messageCreators.put(0x8700, T8700DrivingRecordDataCollection::new);
-        messageCreators.put(0x8701, T8701DrivingRecordParameterTransmission::new);
-        messageCreators.put(0x8702, T8702DriverIdentityInfoRequest::new);
+    /**
+     * 初始化终端消息创建器 (0x0xxx)
+     */
+    private void initTerminalMessages() {
+        messageCreators.put(MessageTypes.Terminal.COMMON_RESPONSE, T0001TerminalCommonResponse::new);
+        messageCreators.put(MessageTypes.Terminal.HEARTBEAT, T0002TerminalHeartbeat::new);
+        messageCreators.put(MessageTypes.Terminal.REGISTER, T0100TerminalRegister::new);
+        messageCreators.put(MessageTypes.Terminal.AUTH, T0102TerminalAuth::new);
+        messageCreators.put(MessageTypes.Terminal.QUERY_PARAMETERS_RESPONSE, T0104QueryTerminalParametersResponse::new);
+        messageCreators.put(MessageTypes.Terminal.QUERY_PROPERTY_RESPONSE, T0107QueryTerminalPropertyResponse::new);
+        messageCreators.put(MessageTypes.Terminal.UPGRADE_RESULT_NOTIFICATION, T0108TerminalUpgradeResultNotification::new);
+        messageCreators.put(MessageTypes.Terminal.LOCATION_REPORT, T0200LocationReport::new);
+        messageCreators.put(MessageTypes.Terminal.POSITION_INFO_QUERY_RESPONSE, T0201PositionInfoQueryResponse::new);
+        messageCreators.put(MessageTypes.Terminal.EVENT_REPORT, T0301EventReport::new);
+        messageCreators.put(MessageTypes.Terminal.INFO_DEMAND_CANCEL, T0303InfoDemandCancel::new);
+        messageCreators.put(MessageTypes.Terminal.VEHICLE_CONTROL_RESPONSE, T0500VehicleControlResponse::new);
+        messageCreators.put(MessageTypes.Terminal.DRIVING_RECORD_DATA_UPLOAD, T0700DrivingRecordDataUpload::new);
+        messageCreators.put(MessageTypes.Terminal.ELECTRONIC_WAYBILL_REPORT, T0701ElectronicWaybillReport::new);
+        messageCreators.put(MessageTypes.Terminal.DRIVER_IDENTITY_INFO_REPORT, T0702DriverIdentityInfoReport::new);
+        messageCreators.put(MessageTypes.Terminal.LOCATION_DATA_BATCH_UPLOAD, T0704LocationDataBatchUpload::new);
+        messageCreators.put(MessageTypes.Terminal.CAN_BUS_DATA_UPLOAD, T0705CanBusDataUpload::new);
+    }
+
+    /**
+     * 初始化平台消息创建器 (0x8xxx)
+     */
+    private void initPlatformMessages() {
+        messageCreators.put(MessageTypes.Platform.COMMON_RESPONSE, T8001PlatformCommonResponse::new);
+        messageCreators.put(MessageTypes.Platform.RESEND_SUBPACKAGE_REQUEST, T8003ResendSubpackageRequest::new);
+        messageCreators.put(MessageTypes.Platform.REGISTER_RESPONSE, T8100TerminalRegisterResponse::new);
+        messageCreators.put(MessageTypes.Platform.PARAMETER_SETTING, T8103TerminalParameterSetting::new);
+        messageCreators.put(MessageTypes.Platform.QUERY_PARAMETERS, T8104QueryTerminalParameters::new);
+        messageCreators.put(MessageTypes.Platform.TERMINAL_CONTROL, T8105TerminalControl::new);
+        messageCreators.put(MessageTypes.Platform.QUERY_SPECIFIC_PARAMETERS, T8106QuerySpecificTerminalParameters::new);
+        messageCreators.put(MessageTypes.Platform.QUERY_PROPERTY, T8107QueryTerminalProperty::new);
+        messageCreators.put(MessageTypes.Platform.UPGRADE_PACKAGE, T8108TerminalUpgradePackage::new);
+        messageCreators.put(MessageTypes.Platform.POSITION_INFO_QUERY, T8201PositionInfoQuery::new);
+        messageCreators.put(MessageTypes.Platform.TEMPORARY_LOCATION_TRACKING_CONTROL, T8202TemporaryLocationTrackingControl::new);
+        messageCreators.put(MessageTypes.Platform.MANUAL_ALARM_CONFIRMATION, T8203ManualAlarmConfirmation::new);
+        messageCreators.put(MessageTypes.Platform.TEXT_INFO_DISTRIBUTION, T8300TextInfoDistribution::new);
+        messageCreators.put(MessageTypes.Platform.EVENT_SETTING, T8301EventSetting::new);
+        messageCreators.put(MessageTypes.Platform.QUESTION_DISTRIBUTION, T8302QuestionDistribution::new);
+        messageCreators.put(MessageTypes.Platform.INFO_MENU_SETTING, T8303InfoMenuSetting::new);
+        messageCreators.put(MessageTypes.Platform.INFO_SERVICE, T8304InfoService::new);
+        messageCreators.put(MessageTypes.Platform.PHONE_CALLBACK, T8400PhoneCallback::new);
+        messageCreators.put(MessageTypes.Platform.PHONEBOOK_SETTING, T8401PhonebookSetting::new);
+        messageCreators.put(MessageTypes.Platform.VEHICLE_CONTROL, T8500VehicleControl::new);
+        messageCreators.put(MessageTypes.Platform.SET_CIRCULAR_AREA, T8600SetCircularArea::new);
+        messageCreators.put(MessageTypes.Platform.DELETE_CIRCULAR_AREA, T8601DeleteCircularArea::new);
+        messageCreators.put(MessageTypes.Platform.SET_RECTANGULAR_AREA, T8602SetRectangularArea::new);
+        messageCreators.put(MessageTypes.Platform.DELETE_RECTANGULAR_AREA, T8603DeleteRectangularArea::new);
+        messageCreators.put(MessageTypes.Platform.SET_POLYGON_AREA, T8604SetPolygonArea::new);
+        messageCreators.put(MessageTypes.Platform.DELETE_POLYGON_AREA, T8605DeletePolygonArea::new);
+        messageCreators.put(MessageTypes.Platform.SET_ROUTE, T8606SetRoute::new);
+        messageCreators.put(MessageTypes.Platform.DELETE_ROUTE, T8607DeleteRoute::new);
+        messageCreators.put(MessageTypes.Platform.DRIVING_RECORD_DATA_COLLECTION, T8700DrivingRecordDataCollection::new);
+        messageCreators.put(MessageTypes.Platform.DRIVING_RECORD_PARAMETER_TRANSMISSION, T8701DrivingRecordParameterTransmission::new);
+        messageCreators.put(MessageTypes.Platform.DRIVER_IDENTITY_INFO_REQUEST, T8702DriverIdentityInfoRequest::new);
+    }
+
+    /**
+     * 初始化扩展消息创建器
+     * 用于厂商自定义或协议扩展消息
+     */
+    private void initExtensionMessages() {
+        // 预留给扩展消息使用
+        // 示例：messageCreators.put(MessageTypes.Extension.CUSTOM_MESSAGE, CustomMessage::new);
     }
 
     /**
