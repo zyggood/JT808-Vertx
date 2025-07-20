@@ -343,18 +343,22 @@ public class T8602SetRectangularArea extends JT808Message {
             // 右下点经度 (DWORD)
             buffer.appendUnsignedInt(bottomRightLongitude);
             
-            // 起始时间 (BCD[6])
-            if (startTime != null) {
-                buffer.appendBuffer(encodeBcdTime(startTime));
-            } else {
-                buffer.appendBytes(new byte[6]); // 填充0
+            // 起始时间 (BCD[6]) - 仅当区域属性bit0为1时存在
+            if (hasTimeAttribute()) {
+                if (startTime != null) {
+                    buffer.appendBuffer(encodeBcdTime(startTime));
+                } else {
+                    buffer.appendBytes(new byte[6]); // 填充0
+                }
             }
             
-            // 结束时间 (BCD[6])
-            if (endTime != null) {
-                buffer.appendBuffer(encodeBcdTime(endTime));
-            } else {
-                buffer.appendBytes(new byte[6]); // 填充0
+            // 结束时间 (BCD[6]) - 仅当区域属性bit0为1时存在
+            if (hasTimeAttribute()) {
+                if (endTime != null) {
+                    buffer.appendBuffer(encodeBcdTime(endTime));
+                } else {
+                    buffer.appendBytes(new byte[6]); // 填充0
+                }
             }
             
             // 最高速度 (WORD) - 仅当区域属性bit1为1时存在
@@ -404,13 +408,17 @@ public class T8602SetRectangularArea extends JT808Message {
             this.bottomRightLongitude = (int) buffer.getUnsignedInt(index);
             index += 4;
             
-            // 起始时间 (BCD[6])
-            this.startTime = decodeBcdTime(buffer, index);
-            index += 6;
+            // 起始时间 (BCD[6]) - 仅当区域属性bit0为1时存在
+            if (hasTimeAttribute()) {
+                this.startTime = decodeBcdTime(buffer, index);
+                index += 6;
+            }
             
-            // 结束时间 (BCD[6])
-            this.endTime = decodeBcdTime(buffer, index);
-            index += 6;
+            // 结束时间 (BCD[6]) - 仅当区域属性bit0为1时存在
+            if (hasTimeAttribute()) {
+                this.endTime = decodeBcdTime(buffer, index);
+                index += 6;
+            }
             
             // 最高速度 (WORD) - 仅当区域属性bit1为1时存在
             if (hasSpeedLimitAttribute()) {

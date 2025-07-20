@@ -177,7 +177,7 @@ class T8602SetRectangularAreaTest {
         buffer.appendUnsignedInt(40000000); // 左上点经度
         buffer.appendUnsignedInt(117100000); // 右下点纬度
         buffer.appendUnsignedInt(40100000); // 右下点经度
-        buffer.appendBytes(new byte[12]); // 起始时间和结束时间（各6字节）
+        // 注意：由于区域属性不包含时间属性(bit0=0)，所以不包含时间字段
         buffer.appendUnsignedShort(80); // 最高速度
         buffer.appendByte((byte) 10); // 超速持续时间
         

@@ -541,34 +541,64 @@ class T8600SetCircularAreaTest {
     
     @Test
     void testBoundaryValues() {
-        // 测试边界值
-        CircularAreaItem item = new CircularAreaItem();
+        // 测试边界值 - 不包含时间和速度限制属性
+        CircularAreaItem item1 = new CircularAreaItem();
+        item1.setAreaId(Integer.MAX_VALUE);
+        item1.setAreaAttribute(0x0000); // 不包含时间和速度限制属性
+        item1.setCenterLatitude(Integer.MAX_VALUE);
+        item1.setCenterLongitude(Integer.MAX_VALUE);
+        item1.setRadius(Integer.MAX_VALUE);
         
-        // 测试最大值
-        item.setAreaId(Integer.MAX_VALUE);
-        item.setAreaAttribute(0xFFFF);
-        item.setCenterLatitude(Integer.MAX_VALUE);
-        item.setCenterLongitude(Integer.MAX_VALUE);
-        item.setRadius(Integer.MAX_VALUE);
-        item.setMaxSpeed(65535);
-        item.setOverspeedDuration(255);
+        List<CircularAreaItem> items1 = new ArrayList<>();
+        items1.add(item1);
         
-        List<CircularAreaItem> items = new ArrayList<>();
-        items.add(item);
-        
-        T8600SetCircularArea message = new T8600SetCircularArea(T8600SetCircularArea.SETTING_MODIFY, items);
+        T8600SetCircularArea message1 = new T8600SetCircularArea(T8600SetCircularArea.SETTING_MODIFY, items1);
         
         // 编解码测试
-        Buffer encoded = message.encodeBody();
-        T8600SetCircularArea decoded = new T8600SetCircularArea();
-        decoded.decodeBody(encoded);
+        Buffer encoded1 = message1.encodeBody();
+        T8600SetCircularArea decoded1 = new T8600SetCircularArea();
+        decoded1.decodeBody(encoded1);
         
-        CircularAreaItem decodedItem = decoded.getAreaItems().get(0);
-        assertEquals(item.getAreaId(), decodedItem.getAreaId());
-        assertEquals(item.getAreaAttribute(), decodedItem.getAreaAttribute());
-        assertEquals(item.getCenterLatitude(), decodedItem.getCenterLatitude());
-        assertEquals(item.getCenterLongitude(), decodedItem.getCenterLongitude());
-        assertEquals(item.getRadius(), decodedItem.getRadius());
+        CircularAreaItem decodedItem1 = decoded1.getAreaItems().get(0);
+        assertEquals(item1.getAreaId(), decodedItem1.getAreaId());
+        assertEquals(item1.getAreaAttribute(), decodedItem1.getAreaAttribute());
+        assertEquals(item1.getCenterLatitude(), decodedItem1.getCenterLatitude());
+        assertEquals(item1.getCenterLongitude(), decodedItem1.getCenterLongitude());
+        assertEquals(item1.getRadius(), decodedItem1.getRadius());
+        
+        // 测试边界值 - 包含时间和速度限制属性
+        CircularAreaItem item2 = new CircularAreaItem();
+        item2.setAreaId(Integer.MAX_VALUE);
+        item2.setAreaAttribute(T8600SetCircularArea.ATTR_TIME_BASED | T8600SetCircularArea.ATTR_SPEED_LIMIT);
+        item2.setCenterLatitude(Integer.MAX_VALUE);
+        item2.setCenterLongitude(Integer.MAX_VALUE);
+        item2.setRadius(Integer.MAX_VALUE);
+        // 设置时间字段（必须设置，否则编解码不一致）
+        item2.setStartTime(LocalDateTime.of(2099, 12, 31, 23, 59, 59));
+        item2.setEndTime(LocalDateTime.of(2099, 12, 31, 23, 59, 59));
+        item2.setMaxSpeed(65535);
+        item2.setOverspeedDuration(255);
+        
+        List<CircularAreaItem> items2 = new ArrayList<>();
+        items2.add(item2);
+        
+        T8600SetCircularArea message2 = new T8600SetCircularArea(T8600SetCircularArea.SETTING_MODIFY, items2);
+        
+        // 编解码测试
+        Buffer encoded2 = message2.encodeBody();
+        T8600SetCircularArea decoded2 = new T8600SetCircularArea();
+        decoded2.decodeBody(encoded2);
+        
+        CircularAreaItem decodedItem2 = decoded2.getAreaItems().get(0);
+        assertEquals(item2.getAreaId(), decodedItem2.getAreaId());
+        assertEquals(item2.getAreaAttribute(), decodedItem2.getAreaAttribute());
+        assertEquals(item2.getCenterLatitude(), decodedItem2.getCenterLatitude());
+        assertEquals(item2.getCenterLongitude(), decodedItem2.getCenterLongitude());
+        assertEquals(item2.getRadius(), decodedItem2.getRadius());
+        assertEquals(item2.getStartTime(), decodedItem2.getStartTime());
+        assertEquals(item2.getEndTime(), decodedItem2.getEndTime());
+        assertEquals(item2.getMaxSpeed(), decodedItem2.getMaxSpeed());
+        assertEquals(item2.getOverspeedDuration(), decodedItem2.getOverspeedDuration());
         
         logger.info("边界值测试通过");
     }
