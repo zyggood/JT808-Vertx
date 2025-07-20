@@ -100,6 +100,18 @@ JT808MessageFactory factory = JT808MessageFactory.getInstance();
 - 按消息类型分组管理，提高代码可读性和维护性
 - 支持扩展消息类型的预留接口
 
+### 1.1 消息处理器架构 (新增)
+- **处理器接口**: MessageProcessor定义统一的消息处理接口
+- **处理器链模式**: MessageProcessorChain支持按优先级执行多个处理器
+- **核心处理器组件**:
+  - MessageRouter: 消息路由器，支持23个消息类型的路由分发
+  - SessionHandler: 会话管理器，处理会话状态和连接管理
+  - PerformanceMonitor: 性能监控器，收集处理时间和成功率统计
+  - MessageValidator: 消息验证器，支持全局和特定消息类型验证规则
+- **统一管理**: ProcessorManager负责初始化和协调所有处理器
+- **异步处理**: 支持异步消息处理，提高系统并发性能
+- **可扩展性**: 支持动态添加/移除处理器，便于功能扩展
+
 ### 2. 消息基类设计
 - **JT808Message**: 抽象基类，所有消息必须继承
 - **必须实现的抽象方法**:
