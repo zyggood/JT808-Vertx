@@ -423,8 +423,8 @@ class T8607DeleteRouteTest {
         assertNotEquals(msg1.hashCode(), msg2.hashCode());
         
         // 测试与null和不同类型的比较
-        assertNotEquals(msg1, null);
-        assertNotEquals(msg1, "not a message");
+        assertNotEquals(null, msg1);
+        assertNotEquals("not a message", msg1);
         
         // 测试相同对象
         assertEquals(msg1, msg1);
