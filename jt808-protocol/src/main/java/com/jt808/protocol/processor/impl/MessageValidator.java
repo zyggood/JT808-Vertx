@@ -1,6 +1,8 @@
 package com.jt808.protocol.processor.impl;
 
 import com.jt808.protocol.message.JT808Message;
+import com.jt808.protocol.message.T0100TerminalRegister;
+import com.jt808.protocol.message.T0200LocationReport;
 import com.jt808.protocol.processor.MessageProcessor;
 import com.jt808.protocol.processor.ProcessContext;
 import com.jt808.protocol.processor.ProcessResult;
@@ -196,7 +198,6 @@ public class MessageValidator implements MessageProcessor {
         addMessageRule(0x0100, new ValidationRule("TerminalRegisterFormat", "Terminal register message format invalid") {
             @Override
             public boolean validate(JT808Message message, ProcessContext context) {
-                // TODO: 实现具体的终端注册消息格式验证
                 return validateTerminalRegisterMessage(message);
             }
         });
@@ -205,7 +206,6 @@ public class MessageValidator implements MessageProcessor {
         addMessageRule(0x0200, new ValidationRule("LocationReportFormat", "Location report message format invalid") {
             @Override
             public boolean validate(JT808Message message, ProcessContext context) {
-                // TODO: 实现具体的位置信息汇报消息格式验证
                 return validateLocationReportMessage(message);
             }
         });
@@ -218,33 +218,134 @@ public class MessageValidator implements MessageProcessor {
      * 验证终端注册消息格式
      */
     private boolean validateTerminalRegisterMessage(JT808Message message) {
-        // TODO: 根据JT808协议实现具体的验证逻辑
-        // 这里应该验证：
-        // 1. 省域ID
-        // 2. 市县域ID
-        // 3. 制造商ID
-        // 4. 终端型号
-        // 5. 终端ID
-        // 6. 车牌颜色
-        // 7. 车辆标识
-        return true; // 暂时返回true，待具体实现
+        if (!(message instanceof T0100TerminalRegister)) {
+            return false;
+        }
+        
+        T0100TerminalRegister register = (T0100TerminalRegister) message;
+        
+        try {
+            // 1. 验证省域ID (1-99)
+            int provinceId = register.getProvinceId();
+            if (provinceId < 1 || provinceId > 99) {
+                logger.warn("Invalid province ID: {}", provinceId);
+                return false;
+            }
+            
+            // 2. 验证市县域ID (1-9999)
+            int cityId = register.getCityId();
+            if (cityId < 1 || cityId > 9999) {
+                logger.warn("Invalid city ID: {}", cityId);
+                return false;
+            }
+            
+            // 3. 验证制造商ID (5字节，不能为空)
+            String manufacturerId = register.getManufacturerId();
+            if (manufacturerId == null || manufacturerId.trim().isEmpty() || manufacturerId.length() > 5) {
+                logger.warn("Invalid manufacturer ID: {}", manufacturerId);
+                return false;
+            }
+            
+            // 4. 验证终端型号 (20字节，不能为空)
+            String terminalModel = register.getTerminalModel();
+            if (terminalModel == null || terminalModel.trim().isEmpty() || terminalModel.length() > 20) {
+                logger.warn("Invalid terminal model: {}", terminalModel);
+                return false;
+            }
+            
+            // 5. 验证终端ID (7字节，不能为空)
+            String terminalId = register.getTerminalId();
+            if (terminalId == null || terminalId.trim().isEmpty() || terminalId.length() > 7) {
+                logger.warn("Invalid terminal ID: {}", terminalId);
+                return false;
+            }
+            
+            // 6. 验证车牌颜色 (按照JT/T 697.7-2014标准：0-9)
+            int plateColor = register.getPlateColor();
+            if (plateColor < 0 || plateColor > 9) {
+                logger.warn("Invalid plate color: {}", plateColor);
+                return false;
+            }
+            
+            // 7. 验证车牌号码 (不能为空)
+            String plateNumber = register.getPlateNumber();
+            if (plateNumber == null || plateNumber.trim().isEmpty()) {
+                logger.warn("Invalid plate number: {}", plateNumber);
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            logger.error("Error validating terminal register message", e);
+            return false;
+        }
     }
     
     /**
      * 验证位置信息汇报消息格式
      */
     private boolean validateLocationReportMessage(JT808Message message) {
-        // TODO: 根据JT808协议实现具体的验证逻辑
-        // 这里应该验证：
-        // 1. 报警标志
-        // 2. 状态
-        // 3. 纬度
-        // 4. 经度
-        // 5. 高程
-        // 6. 速度
-        // 7. 方向
-        // 8. 时间
-        return true; // 暂时返回true，待具体实现
+        if (!(message instanceof T0200LocationReport)) {
+            return false;
+        }
+        
+        T0200LocationReport locationReport = (T0200LocationReport) message;
+        
+        try {
+            // 1. 验证报警标志 (DWORD，任何值都有效)
+            // 报警标志位是位标志，不需要范围验证
+            
+            // 2. 验证状态 (DWORD，任何值都有效)
+            // 状态位是位标志，不需要范围验证
+            
+            // 3. 验证纬度 (范围：-90°到+90°，乘以10^6)
+            int latitude = locationReport.getLatitude();
+            if (latitude < -90_000_000 || latitude > 90_000_000) {
+                logger.warn("Invalid latitude: {}", latitude);
+                return false;
+            }
+            
+            // 4. 验证经度 (范围：-180°到+180°，乘以10^6)
+            int longitude = locationReport.getLongitude();
+            if (longitude < -180_000_000 || longitude > 180_000_000) {
+                logger.warn("Invalid longitude: {}", longitude);
+                return false;
+            }
+            
+            // 5. 验证高程 (海拔高度，单位米，合理范围：-1000到10000米)
+            int altitude = locationReport.getAltitude();
+            if (altitude < -1000 || altitude > 10000) {
+                logger.warn("Invalid altitude: {}", altitude);
+                return false;
+            }
+            
+            // 6. 验证速度 (1/10km/h，合理范围：0到2000，即0-200km/h)
+            int speed = locationReport.getSpeed();
+            if (speed < 0 || speed > 2000) {
+                logger.warn("Invalid speed: {}", speed);
+                return false;
+            }
+            
+            // 7. 验证方向 (0-359度，正北为0，顺时针)
+            int direction = locationReport.getDirection();
+            if (direction < 0 || direction > 359) {
+                logger.warn("Invalid direction: {}", direction);
+                return false;
+            }
+            
+            // 8. 验证时间 (不能为空)
+            if (locationReport.getDateTime() == null) {
+                logger.warn("DateTime cannot be null");
+                return false;
+            }
+            
+            return true;
+            
+        } catch (Exception e) {
+            logger.error("Error validating location report message", e);
+            return false;
+        }
     }
     
     /**
