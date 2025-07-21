@@ -94,17 +94,19 @@ public class SessionHandler implements MessageProcessor {
     
     /**
      * 从消息中提取终端ID
+     * 使用消息头中的终端手机号作为唯一标识
      */
     private String extractTerminalId(JT808Message message) {
-        // TODO: 根据实际的消息结构实现终端ID提取逻辑
-        // 这里需要根据JT808Message的实际结构来实现
         try {
             // 从消息头中获取终端手机号作为终端ID
-            if (message.getHeader() != null) {
-                return message.getHeader().getPhoneNumber();
+            if (message != null && message.getHeader() != null) {
+                String phoneNumber = message.getHeader().getPhoneNumber();
+                if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+                    return phoneNumber.trim();
+                }
             }
         } catch (Exception e) {
-            logger.debug("Failed to extract terminal ID from message", e);
+            logger.debug("Failed to extract terminal ID from message: {}", e.getMessage());
         }
         return null;
     }
