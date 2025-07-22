@@ -94,10 +94,15 @@ JT808MessageFactory factory = new JT808MessageFactory();
 JT808MessageFactory factory = JT808MessageFactory.getInstance();
 ```
 
-**重构优化 (2025-07-20)**:
-- 消息创建器初始化已拆分为3个方法：`initTerminalMessages()`、`initPlatformMessages()`、`initExtensionMessages()`
-- 引入 `MessageTypes` 常量类替代硬编码的消息ID
-- 按消息类型分组管理，提高代码可读性和维护性
+**重构优化历史**:
+- **2025-07-20**: 消息创建器初始化已拆分为3个方法：`initTerminalMessages()`、`initPlatformMessages()`、`initExtensionMessages()`
+- **2025-07-20**: 引入 `MessageTypes` 常量类替代硬编码的消息ID
+- **2025-07-20**: 按消息类型分组管理，提高代码可读性和维护性
+- **2025-07-22**: **编解码器优化完成** - JT808Decoder重构使用工厂模式
+  - 移除硬编码的switch-case逻辑（减少40行代码）
+  - 统一使用JT808MessageFactory创建消息实例
+  - 删除重复的GenericJT808Message内部类
+  - 提高代码一致性和可维护性
 - 支持扩展消息类型的预留接口
 
 ### 1.1 消息处理器架构 (新增)

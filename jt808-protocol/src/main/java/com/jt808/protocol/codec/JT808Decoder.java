@@ -3,8 +3,8 @@ package com.jt808.protocol.codec;
 import com.jt808.common.JT808Constants;
 import com.jt808.common.exception.ProtocolException;
 import com.jt808.common.util.ByteUtils;
+import com.jt808.protocol.factory.JT808MessageFactory;
 import com.jt808.protocol.message.*;
-import com.jt808.protocol.message.T0705CanBusDataUpload;
 import io.vertx.core.buffer.Buffer;
 
 /**
@@ -181,71 +181,15 @@ public class JT808Decoder {
      * @param messageId 消息ID
      * @return 消息对象
      */
-    private JT808Message createMessage(int messageId) {
-        // 根据消息ID创建对应的消息实例
-        switch (messageId) {
-            case 0x0001: // 终端通用应答
-                return new T0001TerminalCommonResponse();
-            case 0x0002: // 终端心跳
-                return new T0002TerminalHeartbeat();
-            case 0x0100: // 终端注册
-                return new T0100TerminalRegister();
-            case 0x0102: // 终端鉴权
-                return new T0102TerminalAuth();
-            case 0x0104: // 查询终端参数应答
-                return new T0104QueryTerminalParametersResponse();
-            case 0x0107: // 查询终端属性应答
-                return new T0107QueryTerminalPropertyResponse();
-            case 0x0200: // 位置信息汇报
-                return new T0200LocationReport();
-            case 0x0704: // 定位数据批量上传
-                return new T0704LocationDataBatchUpload();
-            case 0x0705: // CAN总线数据上传
-                return new T0705CanBusDataUpload();
-            case 0x0301: // 事件报告
-                return new T0301EventReport();
-            case 0x8001: // 平台通用应答
-                return new T8001PlatformCommonResponse();
-            case 0x8100: // 终端注册应答
-                return new T8100TerminalRegisterResponse();
-            case 0x8104: // 查询终端参数
-                return new T8104QueryTerminalParameters();
-            case 0x8106: // 查询指定终端参数
-                return new T8106QuerySpecificTerminalParameters();
-            case 0x8107: // 查询终端属性
-                return new T8107QueryTerminalProperty();
-            case 0x8302: // 提问下发
-                return new T8302QuestionDistribution();
-            default:
-                // 未知消息类型，使用通用消息
-                return new GenericJT808Message(messageId);
-        }
-    }
-
     /**
-     * 通用JT808消息实现
+     * 创建消息实例
+     * 使用工厂模式统一创建消息，避免硬编码
+     *
+     * @param messageId 消息ID
+     * @return 消息实例
      */
-    private static class GenericJT808Message extends JT808Message {
-        private final int messageId;
-        private Buffer bodyData;
-
-        public GenericJT808Message(int messageId) {
-            this.messageId = messageId;
-        }
-
-        @Override
-        public int getMessageId() {
-            return messageId;
-        }
-
-        @Override
-        public Buffer encodeBody() {
-            return bodyData != null ? bodyData : Buffer.buffer();
-        }
-
-        @Override
-        public void decodeBody(Buffer body) {
-            this.bodyData = body;
-        }
+    private JT808Message createMessage(int messageId) {
+        return JT808MessageFactory.getInstance().createMessage(messageId);
     }
+
 }
