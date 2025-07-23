@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 多媒体数据上传应答消息 (0x8801)
+ * 多媒体数据上传应答消息 (0x8800)
  * 平台向终端应答多媒体数据上传，指示需要重传的数据包
  */
-public class T8801MultimediaDataUploadResponse extends JT808Message {
+public class T8800MultimediaDataUploadResponse extends JT808Message {
 
     /**
      * 多媒体ID (DWORD)
@@ -32,12 +32,12 @@ public class T8801MultimediaDataUploadResponse extends JT808Message {
      */
     private List<Integer> retransmissionPacketIds;
 
-    public T8801MultimediaDataUploadResponse() {
+    public T8800MultimediaDataUploadResponse() {
         super();
         this.retransmissionPacketIds = new ArrayList<>();
     }
 
-    public T8801MultimediaDataUploadResponse(JT808Header header) {
+    public T8800MultimediaDataUploadResponse(JT808Header header) {
         super(header);
         this.retransmissionPacketIds = new ArrayList<>();
     }
@@ -48,8 +48,8 @@ public class T8801MultimediaDataUploadResponse extends JT808Message {
      * @param multimediaId 多媒体ID
      * @return 应答消息实例
      */
-    public static T8801MultimediaDataUploadResponse createCompleteResponse(long multimediaId) {
-        T8801MultimediaDataUploadResponse response = new T8801MultimediaDataUploadResponse();
+    public static T8800MultimediaDataUploadResponse createCompleteResponse(long multimediaId) {
+        T8800MultimediaDataUploadResponse response = new T8800MultimediaDataUploadResponse();
         response.setMultimediaId(multimediaId);
         response.setRetransmissionPacketCount(0);
         response.setRetransmissionPacketIds(new ArrayList<>());
@@ -63,8 +63,8 @@ public class T8801MultimediaDataUploadResponse extends JT808Message {
      * @param retransmissionPacketIds 需要重传的包ID列表
      * @return 应答消息实例
      */
-    public static T8801MultimediaDataUploadResponse createRetransmissionResponse(long multimediaId, List<Integer> retransmissionPacketIds) {
-        T8801MultimediaDataUploadResponse response = new T8801MultimediaDataUploadResponse();
+    public static T8800MultimediaDataUploadResponse createRetransmissionResponse(long multimediaId, List<Integer> retransmissionPacketIds) {
+        T8800MultimediaDataUploadResponse response = new T8800MultimediaDataUploadResponse();
         response.setMultimediaId(multimediaId);
         response.setRetransmissionPacketCount(retransmissionPacketIds.size());
         response.setRetransmissionPacketIds(new ArrayList<>(retransmissionPacketIds));
@@ -78,7 +78,7 @@ public class T8801MultimediaDataUploadResponse extends JT808Message {
      * @param retransmissionPacketIds 需要重传的包ID数组
      * @return 应答消息实例
      */
-    public static T8801MultimediaDataUploadResponse createRetransmissionResponse(long multimediaId, int... retransmissionPacketIds) {
+    public static T8800MultimediaDataUploadResponse createRetransmissionResponse(long multimediaId, int... retransmissionPacketIds) {
         List<Integer> packetIds = new ArrayList<>();
         for (int packetId : retransmissionPacketIds) {
             packetIds.add(packetId);
@@ -279,7 +279,7 @@ public class T8801MultimediaDataUploadResponse extends JT808Message {
     @Override
     public String toString() {
         return String.format(
-            "T8801MultimediaDataUploadResponse{" +
+            "T8800MultimediaDataUploadResponse{" +
             "multimediaId=%d(0x%08X), " +
             "retransmissionPacketCount=%d, " +
             "retransmissionPacketIds=%s, " +
@@ -299,7 +299,7 @@ public class T8801MultimediaDataUploadResponse extends JT808Message {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
-        T8801MultimediaDataUploadResponse that = (T8801MultimediaDataUploadResponse) o;
+        T8800MultimediaDataUploadResponse that = (T8800MultimediaDataUploadResponse) o;
         return multimediaId == that.multimediaId &&
                retransmissionPacketCount == that.retransmissionPacketCount &&
                Objects.equals(retransmissionPacketIds, that.retransmissionPacketIds);

@@ -7,16 +7,16 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * T8801 多媒体数据上传应答消息测试类
+ * T8800 多媒体数据上传应答消息测试类
  * 
  * @author JT808 Protocol
  * @version 1.0
  */
-class T8801MultimediaDataUploadResponseTest {
+class T8800MultimediaDataUploadResponseTest {
 
     @Test
     void testMessageId() {
-        T8801MultimediaDataUploadResponse message = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse message = new T8800MultimediaDataUploadResponse();
         assertEquals(MessageTypes.Platform.MULTIMEDIA_DATA_UPLOAD_RESPONSE, message.getMessageId());
     }
 
@@ -24,7 +24,7 @@ class T8801MultimediaDataUploadResponseTest {
     void testCompleteResponse() {
         // 测试完整接收应答（无重传包）
         long multimediaId = 0x12345678L;
-        T8801MultimediaDataUploadResponse message = T8801MultimediaDataUploadResponse.createCompleteResponse(multimediaId);
+        T8800MultimediaDataUploadResponse message = T8800MultimediaDataUploadResponse.createCompleteResponse(multimediaId);
         
         assertEquals(multimediaId, message.getMultimediaId());
         assertEquals(0, message.getRetransmissionPacketCount());
@@ -40,7 +40,7 @@ class T8801MultimediaDataUploadResponseTest {
         assertEquals(0x78, encoded.getByte(3));
         
         // 解码测试
-        T8801MultimediaDataUploadResponse decoded = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse decoded = new T8800MultimediaDataUploadResponse();
         decoded.decodeBody(encoded);
         assertEquals(multimediaId, decoded.getMultimediaId());
         assertEquals(0, decoded.getRetransmissionPacketCount());
@@ -53,7 +53,7 @@ class T8801MultimediaDataUploadResponseTest {
         long multimediaId = 0xABCDEF01L;
         int[] retransmissionIds = {1, 3, 5, 7};
         
-        T8801MultimediaDataUploadResponse message = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse message = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(multimediaId, retransmissionIds);
         
         assertEquals(multimediaId, message.getMultimediaId());
@@ -80,7 +80,7 @@ class T8801MultimediaDataUploadResponseTest {
         assertEquals(7, encoded.getShort(11));
         
         // 解码测试
-        T8801MultimediaDataUploadResponse decoded = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse decoded = new T8800MultimediaDataUploadResponse();
         decoded.decodeBody(encoded);
         assertEquals(multimediaId, decoded.getMultimediaId());
         assertEquals(4, decoded.getRetransmissionPacketCount());
@@ -93,19 +93,20 @@ class T8801MultimediaDataUploadResponseTest {
         long multimediaId = 0x11223344L;
         int[] emptyIds = {};
         
-        T8801MultimediaDataUploadResponse message = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse message = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(multimediaId, emptyIds);
         
         assertEquals(multimediaId, message.getMultimediaId());
         assertEquals(0, message.getRetransmissionPacketCount());
+        assertNotNull(message.getRetransmissionPacketIds());
         assertEquals(0, message.getRetransmissionPacketIds().size());
         
         // 编码测试
         Buffer encoded = message.encodeBody();
-        assertEquals(4, encoded.length()); // 4字节多媒体ID (无重传包时不包含重传包总数)
+        assertEquals(5, encoded.length()); // 4字节多媒体ID + 1字节重传包总数（0）
         
         // 解码测试
-        T8801MultimediaDataUploadResponse decoded = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse decoded = new T8800MultimediaDataUploadResponse();
         decoded.decodeBody(encoded);
         assertEquals(multimediaId, decoded.getMultimediaId());
         assertEquals(0, decoded.getRetransmissionPacketCount());
@@ -121,7 +122,7 @@ class T8801MultimediaDataUploadResponseTest {
             maxIds[i] = i;
         }
         
-        T8801MultimediaDataUploadResponse message = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse message = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(multimediaId, maxIds);
         
         assertEquals(multimediaId, message.getMultimediaId());
@@ -133,7 +134,7 @@ class T8801MultimediaDataUploadResponseTest {
         assertEquals(515, encoded.length()); // 4字节多媒体ID + 1字节重传包总数 + 510字节重传包ID列表
         
         // 解码测试
-        T8801MultimediaDataUploadResponse decoded = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse decoded = new T8800MultimediaDataUploadResponse();
         decoded.decodeBody(encoded);
         assertEquals(multimediaId, decoded.getMultimediaId());
         assertEquals(255, decoded.getRetransmissionPacketCount());
@@ -146,7 +147,7 @@ class T8801MultimediaDataUploadResponseTest {
         long maxMultimediaId = 0xFFFFFFFFL;
         int[] boundaryIds = {0, 1, 254, 255, 65534, 65535};
         
-        T8801MultimediaDataUploadResponse message = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse message = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(maxMultimediaId, boundaryIds);
         
         assertEquals(maxMultimediaId, message.getMultimediaId());
@@ -155,7 +156,7 @@ class T8801MultimediaDataUploadResponseTest {
         
         // 编码解码测试
         Buffer encoded = message.encodeBody();
-        T8801MultimediaDataUploadResponse decoded = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse decoded = new T8800MultimediaDataUploadResponse();
         decoded.decodeBody(encoded);
         
         assertEquals(maxMultimediaId, decoded.getMultimediaId());
@@ -165,34 +166,38 @@ class T8801MultimediaDataUploadResponseTest {
 
     @Test
     void testSettersAndGetters() {
-        T8801MultimediaDataUploadResponse message = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse message = new T8800MultimediaDataUploadResponse();
         
         // 测试设置和获取多媒体ID
-        long multimediaId = 0x87654321L;
-        message.setMultimediaId(multimediaId);
-        assertEquals(multimediaId, message.getMultimediaId());
+        long testId = 0x87654321L;
+        message.setMultimediaId(testId);
+        assertEquals(testId, message.getMultimediaId());
+        
+        // 测试设置和获取重传包总数
+        int testCount = 5;
+        message.setRetransmissionPacketCount(testCount);
+        assertEquals(testCount, message.getRetransmissionPacketCount());
         
         // 测试设置和获取重传包ID列表
-        java.util.List<Integer> retransmissionIds = java.util.Arrays.asList(10, 20, 30);
-        message.setRetransmissionPacketIds(retransmissionIds);
-        assertEquals(3, message.getRetransmissionPacketCount());
-        assertEquals(retransmissionIds, message.getRetransmissionPacketIds());
+        java.util.List<Integer> testIds = java.util.Arrays.asList(10, 20, 30);
+        message.setRetransmissionPacketIds(testIds);
+        assertEquals(testIds, message.getRetransmissionPacketIds());
         
-        // 测试设置null数组
-        message.setRetransmissionPacketIds(null);
-        assertEquals(0, message.getRetransmissionPacketCount());
-        assertNotNull(message.getRetransmissionPacketIds());
+        // 测试辅助方法
+        assertTrue(message.needsRetransmission());
+        assertEquals(testId, message.getMultimediaIdUnsigned());
+        assertEquals(testCount, message.getRetransmissionPacketCountUnsigned());
         assertEquals(0, message.getRetransmissionPacketIds().size());
     }
 
     @Test
     void testToString() {
-        T8801MultimediaDataUploadResponse message = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse message = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(0x12345678L, 1, 2, 3);
         
         String result = message.toString();
         assertNotNull(result);
-        assertTrue(result.contains("T8801MultimediaDataUploadResponse"));
+        assertTrue(result.contains("T8800MultimediaDataUploadResponse"));
         assertTrue(result.contains("multimediaId=305419896"));
         assertTrue(result.contains("retransmissionPacketCount=3"));
         assertTrue(result.contains("retransmissionPacketIds=1, 2, 3"));
@@ -200,7 +205,7 @@ class T8801MultimediaDataUploadResponseTest {
 
     @Test
     void testInvalidDecoding() {
-        T8801MultimediaDataUploadResponse message = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse message = new T8800MultimediaDataUploadResponse();
         
         // 测试空缓冲区
         Buffer emptyBuffer = Buffer.buffer();

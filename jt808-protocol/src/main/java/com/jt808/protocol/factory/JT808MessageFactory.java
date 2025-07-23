@@ -7,7 +7,7 @@ import com.jt808.protocol.constants.MessageTypes;
 import com.jt808.protocol.message.*;
 import com.jt808.protocol.message.T0705CanBusDataUpload;
 import com.jt808.protocol.message.T0801MultimediaDataUpload;
-import com.jt808.protocol.message.T8801MultimediaDataUploadResponse;
+import com.jt808.protocol.message.T8800MultimediaDataUploadResponse;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -107,7 +107,7 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Platform.DRIVING_RECORD_DATA_COLLECTION, T8700DrivingRecordDataCollection::new);
         messageCreators.put(MessageTypes.Platform.DRIVING_RECORD_PARAMETER_TRANSMISSION, T8701DrivingRecordParameterTransmission::new);
         messageCreators.put(MessageTypes.Platform.DRIVER_IDENTITY_INFO_REQUEST, T8702DriverIdentityInfoRequest::new);
-        messageCreators.put(MessageTypes.Platform.MULTIMEDIA_DATA_UPLOAD_RESPONSE, T8801MultimediaDataUploadResponse::new);
+        messageCreators.put(MessageTypes.Platform.MULTIMEDIA_DATA_UPLOAD_RESPONSE, T8800MultimediaDataUploadResponse::new);
     }
 
     /**

@@ -121,7 +121,7 @@ public final class MessageTypes {
         /** 上报驾驶员身份信息请求 */
         public static final int DRIVER_IDENTITY_INFO_REQUEST = 0x8702;
         /** 多媒体数据上传应答 */
-        public static final int MULTIMEDIA_DATA_UPLOAD_RESPONSE = 0x8801;
+        public static final int MULTIMEDIA_DATA_UPLOAD_RESPONSE = 0x8800;
 
         private Platform() {}
     }

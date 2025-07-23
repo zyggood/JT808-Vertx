@@ -1,6 +1,6 @@
 package com.jt808.protocol.example;
 
-import com.jt808.protocol.message.T8801MultimediaDataUploadResponse;
+import com.jt808.protocol.message.T8800MultimediaDataUploadResponse;
 import io.vertx.core.buffer.Buffer;
 
 /**
@@ -14,7 +14,7 @@ import io.vertx.core.buffer.Buffer;
  * @author JT808 Protocol
  * @version 1.0
  */
-public class T8801MultimediaDataUploadResponseExample {
+public class T8800MultimediaDataUploadResponseExample {
 
     public static void main(String[] args) {
         System.out.println("=== T8801 多媒体数据上传应答消息示例 ===");
@@ -49,7 +49,7 @@ public class T8801MultimediaDataUploadResponseExample {
         long multimediaId = 0x12345678L;
         
         // 创建完整接收应答
-        T8801MultimediaDataUploadResponse response = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse response = T8800MultimediaDataUploadResponse
                 .createCompleteResponse(multimediaId);
         
         System.out.println("多媒体ID: 0x" + Long.toHexString(multimediaId).toUpperCase());
@@ -77,7 +77,7 @@ public class T8801MultimediaDataUploadResponseExample {
         int[] missingPacketIds = {2, 5, 8, 12};
         
         // 创建重传应答
-        T8801MultimediaDataUploadResponse response = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse response = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(multimediaId, missingPacketIds);
         
         System.out.println("多媒体ID: 0x" + Long.toHexString(multimediaId).toUpperCase());
@@ -110,7 +110,7 @@ public class T8801MultimediaDataUploadResponseExample {
         long originalMultimediaId = 0x87654321L;
         int[] originalPacketIds = {1, 3, 7, 15, 31};
         
-        T8801MultimediaDataUploadResponse originalMessage = T8801MultimediaDataUploadResponse
+        T8800MultimediaDataUploadResponse originalMessage = T8800MultimediaDataUploadResponse
                 .createRetransmissionResponse(originalMultimediaId, originalPacketIds);
         
         System.out.println("原始消息: " + originalMessage);
@@ -120,7 +120,7 @@ public class T8801MultimediaDataUploadResponseExample {
         System.out.println("编码数据: " + bytesToHex(encoded.getBytes()));
         
         // 解码消息
-        T8801MultimediaDataUploadResponse decodedMessage = new T8801MultimediaDataUploadResponse();
+        T8800MultimediaDataUploadResponse decodedMessage = new T8800MultimediaDataUploadResponse();
         decodedMessage.decodeBody(encoded);
         
         System.out.println("解码消息: " + decodedMessage);
@@ -169,17 +169,17 @@ public class T8801MultimediaDataUploadResponseExample {
         }
         System.out.println();
         
-        T8801MultimediaDataUploadResponse response;
+        T8800MultimediaDataUploadResponse response;
         
         if (missingPackets.isEmpty()) {
             // 完整接收
-            response = T8801MultimediaDataUploadResponse.createCompleteResponse(multimediaId);
+            response = T8800MultimediaDataUploadResponse.createCompleteResponse(multimediaId);
             System.out.println("处理结果: 完整接收所有分包");
         } else {
             // 需要重传
             int[] missingArray = missingPackets.stream().mapToInt(Short::intValue).toArray();
             
-            response = T8801MultimediaDataUploadResponse.createRetransmissionResponse(multimediaId, missingArray);
+            response = T8800MultimediaDataUploadResponse.createRetransmissionResponse(multimediaId, missingArray);
             System.out.println("处理结果: 需要重传 " + missingPackets.size() + " 个分包");
             System.out.println("丢失分包: " + missingPackets);
         }
