@@ -48,6 +48,8 @@ public final class MessageTypes {
         public static final int LOCATION_DATA_BATCH_UPLOAD = 0x0704;
         /** CAN总线数据上传 */
         public static final int CAN_BUS_DATA_UPLOAD = 0x0705;
+        /** 多媒体数据上传 */
+        public static final int MULTIMEDIA_DATA_UPLOAD = 0x0801;
 
         private Terminal() {}
     }

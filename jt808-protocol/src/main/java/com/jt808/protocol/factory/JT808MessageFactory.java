@@ -6,6 +6,7 @@ import com.jt808.protocol.codec.JT808Encoder;
 import com.jt808.protocol.constants.MessageTypes;
 import com.jt808.protocol.message.*;
 import com.jt808.protocol.message.T0705CanBusDataUpload;
+import com.jt808.protocol.message.T0801MultimediaDataUpload;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -67,6 +68,7 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Terminal.DRIVER_IDENTITY_INFO_REPORT, T0702DriverIdentityInfoReport::new);
         messageCreators.put(MessageTypes.Terminal.LOCATION_DATA_BATCH_UPLOAD, T0704LocationDataBatchUpload::new);
         messageCreators.put(MessageTypes.Terminal.CAN_BUS_DATA_UPLOAD, T0705CanBusDataUpload::new);
+        messageCreators.put(MessageTypes.Terminal.MULTIMEDIA_DATA_UPLOAD, T0801MultimediaDataUpload::new);
     }
 
     /**
