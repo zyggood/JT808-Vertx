@@ -122,6 +122,8 @@ public final class MessageTypes {
         public static final int DRIVER_IDENTITY_INFO_REQUEST = 0x8702;
         /** 多媒体数据上传应答 */
         public static final int MULTIMEDIA_DATA_UPLOAD_RESPONSE = 0x8800;
+        /** 摄像头立即拍摄命令 */
+        public static final int CAMERA_IMMEDIATE_SHOOTING_COMMAND = 0x8801;
 
         private Platform() {}
     }

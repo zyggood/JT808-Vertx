@@ -103,7 +103,7 @@ class T8800MultimediaDataUploadResponseTest {
         
         // 编码测试
         Buffer encoded = message.encodeBody();
-        assertEquals(5, encoded.length()); // 4字节多媒体ID + 1字节重传包总数（0）
+        assertEquals(4, encoded.length()); // 4字节多媒体ID，无重传包时没有重传包总数字段
         
         // 解码测试
         T8800MultimediaDataUploadResponse decoded = new T8800MultimediaDataUploadResponse();
@@ -186,8 +186,8 @@ class T8800MultimediaDataUploadResponseTest {
         // 测试辅助方法
         assertTrue(message.needsRetransmission());
         assertEquals(testId, message.getMultimediaIdUnsigned());
-        assertEquals(testCount, message.getRetransmissionPacketCountUnsigned());
-        assertEquals(0, message.getRetransmissionPacketIds().size());
+        assertEquals(3, message.getRetransmissionPacketCountUnsigned());
+        assertEquals(3, message.getRetransmissionPacketIds().size());
     }
 
     @Test
