@@ -18,6 +18,8 @@ import com.jt808.protocol.message.T8805SingleMultimediaDataRetrievalUploadComman
 import com.jt808.protocol.message.T8900DataDownlinkTransparentTransmission;
 import com.jt808.protocol.message.T0900DataUplinkTransparentTransmission;
 import com.jt808.protocol.message.T0901DataCompressionReport;
+import com.jt808.protocol.message.T0A00TerminalRSAPublicKey;
+import com.jt808.protocol.message.T8A00PlatformRSAPublicKey;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -84,6 +86,7 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Terminal.CAMERA_IMMEDIATE_SHOOTING_COMMAND_RESPONSE, T0805CameraImmediateShootingCommandResponse::new);
         messageCreators.put(MessageTypes.Terminal.DATA_UPLINK_TRANSPARENT_TRANSMISSION, T0900DataUplinkTransparentTransmission::new);
         messageCreators.put(MessageTypes.Terminal.DATA_COMPRESSION_REPORT, T0901DataCompressionReport::new);
+        messageCreators.put(MessageTypes.Terminal.TERMINAL_RSA_PUBLIC_KEY, T0A00TerminalRSAPublicKey::new);
     }
 
     /**
@@ -128,6 +131,7 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Platform.RECORDING_START_COMMAND, T8804RecordingStartCommand::new);
         messageCreators.put(MessageTypes.Platform.SINGLE_MULTIMEDIA_DATA_RETRIEVAL_UPLOAD_COMMAND, T8805SingleMultimediaDataRetrievalUploadCommand::new);
         messageCreators.put(MessageTypes.Platform.DATA_DOWNLINK_TRANSPARENT_TRANSMISSION, T8900DataDownlinkTransparentTransmission::new);
+        messageCreators.put(MessageTypes.Platform.PLATFORM_RSA_PUBLIC_KEY, T8A00PlatformRSAPublicKey::new);
     }
 
     /**

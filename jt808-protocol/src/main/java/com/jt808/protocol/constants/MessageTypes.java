@@ -58,6 +58,8 @@ public final class MessageTypes {
         public static final int DATA_UPLINK_TRANSPARENT_TRANSMISSION = 0x0900;
         /** 数据压缩上报 */
         public static final int DATA_COMPRESSION_REPORT = 0x0901;
+        /** 终端RSA公钥 */
+        public static final int TERMINAL_RSA_PUBLIC_KEY = 0x0A00;
 
         private Terminal() {}
     }
@@ -142,6 +144,8 @@ public final class MessageTypes {
         public static final int SINGLE_MULTIMEDIA_DATA_RETRIEVAL_UPLOAD_COMMAND = 0x8805;
         /** 数据下行透传 */
         public static final int DATA_DOWNLINK_TRANSPARENT_TRANSMISSION = 0x8900;
+        /** 平台RSA公钥 */
+        public static final int PLATFORM_RSA_PUBLIC_KEY = 0x8A00;
 
         private Platform() {}
     }
