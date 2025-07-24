@@ -14,6 +14,8 @@ import com.jt808.protocol.message.T8802StoredMultimediaDataRetrieval;
 import com.jt808.protocol.message.T0802StoredMultimediaDataRetrievalResponse;
 import com.jt808.protocol.message.T8803StoredMultimediaDataUploadCommand;
 import com.jt808.protocol.message.T8804RecordingStartCommand;
+import com.jt808.protocol.message.T8805SingleMultimediaDataRetrievalUploadCommand;
+import com.jt808.protocol.message.T8900DataDownlinkTransparentTransmission;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -120,6 +122,8 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Platform.STORED_MULTIMEDIA_DATA_RETRIEVAL, T8802StoredMultimediaDataRetrieval::new);
         messageCreators.put(MessageTypes.Platform.STORED_MULTIMEDIA_DATA_UPLOAD_COMMAND, T8803StoredMultimediaDataUploadCommand::new);
         messageCreators.put(MessageTypes.Platform.RECORDING_START_COMMAND, T8804RecordingStartCommand::new);
+        messageCreators.put(MessageTypes.Platform.SINGLE_MULTIMEDIA_DATA_RETRIEVAL_UPLOAD_COMMAND, T8805SingleMultimediaDataRetrievalUploadCommand::new);
+        messageCreators.put(MessageTypes.Platform.DATA_DOWNLINK_TRANSPARENT_TRANSMISSION, T8900DataDownlinkTransparentTransmission::new);
     }
 
     /**

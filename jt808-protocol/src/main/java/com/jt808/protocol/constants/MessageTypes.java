@@ -134,6 +134,10 @@ public final class MessageTypes {
         public static final int STORED_MULTIMEDIA_DATA_UPLOAD_COMMAND = 0x8803;
         /** 录音开始命令 */
         public static final int RECORDING_START_COMMAND = 0x8804;
+        /** 单条存储多媒体数据检索上传命令 */
+        public static final int SINGLE_MULTIMEDIA_DATA_RETRIEVAL_UPLOAD_COMMAND = 0x8805;
+        /** 数据下行透传 */
+        public static final int DATA_DOWNLINK_TRANSPARENT_TRANSMISSION = 0x8900;
 
         private Platform() {}
     }
