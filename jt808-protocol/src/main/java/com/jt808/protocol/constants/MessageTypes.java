@@ -50,6 +50,8 @@ public final class MessageTypes {
         public static final int CAN_BUS_DATA_UPLOAD = 0x0705;
         /** 多媒体数据上传 */
         public static final int MULTIMEDIA_DATA_UPLOAD = 0x0801;
+        /** 摄像头立即拍摄命令应答 */
+        public static final int CAMERA_IMMEDIATE_SHOOTING_COMMAND_RESPONSE = 0x0805;
 
         private Terminal() {}
     }

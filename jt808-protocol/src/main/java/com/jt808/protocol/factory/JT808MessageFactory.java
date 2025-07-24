@@ -7,6 +7,7 @@ import com.jt808.protocol.constants.MessageTypes;
 import com.jt808.protocol.message.*;
 import com.jt808.protocol.message.T0705CanBusDataUpload;
 import com.jt808.protocol.message.T0801MultimediaDataUpload;
+import com.jt808.protocol.message.T0805CameraImmediateShootingCommandResponse;
 import com.jt808.protocol.message.T8800MultimediaDataUploadResponse;
 import com.jt808.protocol.message.T8801CameraImmediateShootingCommand;
 import io.vertx.core.buffer.Buffer;
@@ -71,6 +72,7 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Terminal.LOCATION_DATA_BATCH_UPLOAD, T0704LocationDataBatchUpload::new);
         messageCreators.put(MessageTypes.Terminal.CAN_BUS_DATA_UPLOAD, T0705CanBusDataUpload::new);
         messageCreators.put(MessageTypes.Terminal.MULTIMEDIA_DATA_UPLOAD, T0801MultimediaDataUpload::new);
+        messageCreators.put(MessageTypes.Terminal.CAMERA_IMMEDIATE_SHOOTING_COMMAND_RESPONSE, T0805CameraImmediateShootingCommandResponse::new);
     }
 
     /**
