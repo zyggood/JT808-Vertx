@@ -10,6 +10,7 @@ import com.jt808.protocol.message.T0801MultimediaDataUpload;
 import com.jt808.protocol.message.T0805CameraImmediateShootingCommandResponse;
 import com.jt808.protocol.message.T8800MultimediaDataUploadResponse;
 import com.jt808.protocol.message.T8801CameraImmediateShootingCommand;
+import com.jt808.protocol.message.T8802StoredMultimediaDataRetrieval;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -112,6 +113,7 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Platform.DRIVER_IDENTITY_INFO_REQUEST, T8702DriverIdentityInfoRequest::new);
         messageCreators.put(MessageTypes.Platform.MULTIMEDIA_DATA_UPLOAD_RESPONSE, T8800MultimediaDataUploadResponse::new);
         messageCreators.put(MessageTypes.Platform.CAMERA_IMMEDIATE_SHOOTING_COMMAND, T8801CameraImmediateShootingCommand::new);
+        messageCreators.put(MessageTypes.Platform.STORED_MULTIMEDIA_DATA_RETRIEVAL, T8802StoredMultimediaDataRetrieval::new);
     }
 
     /**

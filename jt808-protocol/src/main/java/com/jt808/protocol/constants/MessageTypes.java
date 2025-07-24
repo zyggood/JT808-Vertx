@@ -126,6 +126,8 @@ public final class MessageTypes {
         public static final int MULTIMEDIA_DATA_UPLOAD_RESPONSE = 0x8800;
         /** 摄像头立即拍摄命令 */
         public static final int CAMERA_IMMEDIATE_SHOOTING_COMMAND = 0x8801;
+        /** 存储多媒体数据检索 */
+        public static final int STORED_MULTIMEDIA_DATA_RETRIEVAL = 0x8802;
 
         private Platform() {}
     }
