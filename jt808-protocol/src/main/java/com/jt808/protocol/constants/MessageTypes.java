@@ -52,6 +52,8 @@ public final class MessageTypes {
         public static final int MULTIMEDIA_DATA_UPLOAD = 0x0801;
         /** 摄像头立即拍摄命令应答 */
         public static final int CAMERA_IMMEDIATE_SHOOTING_COMMAND_RESPONSE = 0x0805;
+        /** 存储多媒体数据检索应答 */
+        public static final int STORED_MULTIMEDIA_DATA_RETRIEVAL_RESPONSE = 0x0802;
 
         private Terminal() {}
     }
