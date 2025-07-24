@@ -16,6 +16,8 @@ import com.jt808.protocol.message.T8803StoredMultimediaDataUploadCommand;
 import com.jt808.protocol.message.T8804RecordingStartCommand;
 import com.jt808.protocol.message.T8805SingleMultimediaDataRetrievalUploadCommand;
 import com.jt808.protocol.message.T8900DataDownlinkTransparentTransmission;
+import com.jt808.protocol.message.T0900DataUplinkTransparentTransmission;
+import com.jt808.protocol.message.T0901DataCompressionReport;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -80,6 +82,8 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Terminal.MULTIMEDIA_DATA_UPLOAD, T0801MultimediaDataUpload::new);
         messageCreators.put(MessageTypes.Terminal.STORED_MULTIMEDIA_DATA_RETRIEVAL_RESPONSE, T0802StoredMultimediaDataRetrievalResponse::new);
         messageCreators.put(MessageTypes.Terminal.CAMERA_IMMEDIATE_SHOOTING_COMMAND_RESPONSE, T0805CameraImmediateShootingCommandResponse::new);
+        messageCreators.put(MessageTypes.Terminal.DATA_UPLINK_TRANSPARENT_TRANSMISSION, T0900DataUplinkTransparentTransmission::new);
+        messageCreators.put(MessageTypes.Terminal.DATA_COMPRESSION_REPORT, T0901DataCompressionReport::new);
     }
 
     /**
