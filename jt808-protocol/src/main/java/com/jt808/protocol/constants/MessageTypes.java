@@ -130,6 +130,10 @@ public final class MessageTypes {
         public static final int CAMERA_IMMEDIATE_SHOOTING_COMMAND = 0x8801;
         /** 存储多媒体数据检索 */
         public static final int STORED_MULTIMEDIA_DATA_RETRIEVAL = 0x8802;
+        /** 存储多媒体数据上传命令 */
+        public static final int STORED_MULTIMEDIA_DATA_UPLOAD_COMMAND = 0x8803;
+        /** 录音开始命令 */
+        public static final int RECORDING_START_COMMAND = 0x8804;
 
         private Platform() {}
     }

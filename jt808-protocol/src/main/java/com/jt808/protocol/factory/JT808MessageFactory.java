@@ -12,6 +12,8 @@ import com.jt808.protocol.message.T8800MultimediaDataUploadResponse;
 import com.jt808.protocol.message.T8801CameraImmediateShootingCommand;
 import com.jt808.protocol.message.T8802StoredMultimediaDataRetrieval;
 import com.jt808.protocol.message.T0802StoredMultimediaDataRetrievalResponse;
+import com.jt808.protocol.message.T8803StoredMultimediaDataUploadCommand;
+import com.jt808.protocol.message.T8804RecordingStartCommand;
 import io.vertx.core.buffer.Buffer;
 
 import java.util.HashMap;
@@ -116,6 +118,8 @@ public class JT808MessageFactory {
         messageCreators.put(MessageTypes.Platform.MULTIMEDIA_DATA_UPLOAD_RESPONSE, T8800MultimediaDataUploadResponse::new);
         messageCreators.put(MessageTypes.Platform.CAMERA_IMMEDIATE_SHOOTING_COMMAND, T8801CameraImmediateShootingCommand::new);
         messageCreators.put(MessageTypes.Platform.STORED_MULTIMEDIA_DATA_RETRIEVAL, T8802StoredMultimediaDataRetrieval::new);
+        messageCreators.put(MessageTypes.Platform.STORED_MULTIMEDIA_DATA_UPLOAD_COMMAND, T8803StoredMultimediaDataUploadCommand::new);
+        messageCreators.put(MessageTypes.Platform.RECORDING_START_COMMAND, T8804RecordingStartCommand::new);
     }
 
     /**
