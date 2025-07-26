@@ -65,8 +65,14 @@ public class T0100TerminalRegisterTest {
         // 编码
         Buffer encoded = message.encodeBody();
 
-        // 验证编码长度：2+2+5+20+7+1+车牌号长度
-        int expectedLength = 2 + 2 + 5 + 20 + 7 + 1 + "京A12345".getBytes().length;
+        // 验证编码长度：2+2+5+20+7+1+车牌号长度(GBK编码)
+        int plateNumberLength;
+        try {
+            plateNumberLength = "京A12345".getBytes("GBK").length;
+        } catch (Exception e) {
+            plateNumberLength = "京A12345".getBytes().length;
+        }
+        int expectedLength = 2 + 2 + 5 + 20 + 7 + 1 + plateNumberLength;
         assertEquals(expectedLength, encoded.length());
 
         // 解码
@@ -243,8 +249,14 @@ public class T0100TerminalRegisterTest {
         // 车牌颜色 (1字节)
         assertEquals(1, encoded.getByte(36));
 
-        // 车辆标识 (剩余字节)
+        // 车辆标识 (剩余字节，GBK编码)
         byte[] plateBytes = encoded.getBytes(37, encoded.length());
-        assertEquals("京A12345", new String(plateBytes));
+        String plateNumber;
+        try {
+            plateNumber = new String(plateBytes, "GBK");
+        } catch (Exception e) {
+            plateNumber = new String(plateBytes);
+        }
+        assertEquals("京A12345", plateNumber);
     }
 }

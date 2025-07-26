@@ -93,9 +93,14 @@ public class T0100TerminalRegister extends JT808Message {
         // 车牌颜色 (1字节)
         buffer.appendByte(plateColor);
 
-        // 车辆标识 (变长)
-        if (plateNumber != null) {
-            buffer.appendBytes(plateNumber.getBytes());
+        // 车辆标识 (变长，GBK编码)
+        if (plateNumber != null && !plateNumber.isEmpty()) {
+            try {
+                buffer.appendBytes(plateNumber.getBytes("GBK"));
+            } catch (Exception e) {
+                // 如果GBK编码失败，使用默认编码
+                buffer.appendBytes(plateNumber.getBytes());
+            }
         }
 
         return buffer;
@@ -132,10 +137,17 @@ public class T0100TerminalRegister extends JT808Message {
         plateColor = body.getByte(index);
         index += 1;
 
-        // 车辆标识 (剩余字节)
+        // 车辆标识 (剩余字节，GBK编码)
         if (index < body.length()) {
             byte[] plateBytes = body.getBytes(index, body.length());
-            plateNumber = new String(plateBytes);
+            try {
+                plateNumber = new String(plateBytes, "GBK").trim();
+                // 移除可能的null字符
+                plateNumber = plateNumber.replace("\0", "");
+            } catch (Exception e) {
+                // 如果GBK解码失败，使用默认编码
+                plateNumber = new String(plateBytes).trim().replace("\0", "");
+            }
         } else {
             plateNumber = ""; // 确保空车牌号返回空字符串而不是null
         }

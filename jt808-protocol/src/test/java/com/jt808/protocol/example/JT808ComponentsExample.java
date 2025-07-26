@@ -1,6 +1,7 @@
 package com.jt808.protocol.example;
 
 import com.jt808.common.exception.ProtocolException;
+import com.jt808.common.util.ByteUtils;
 import com.jt808.protocol.factory.JT808MessageFactory;
 import com.jt808.protocol.message.JT808Header;
 import com.jt808.protocol.message.JT808Message;
@@ -43,6 +44,8 @@ class JT808ComponentsExample {
         Buffer encodedMessage = factory.encodeMessage(heartbeat);
         logger.info("2. 编码后消息长度: {} 字节", encodedMessage.length());
 
+        logger.info("编码后16进制字符串：{}", ByteUtils.bytesToHex(encodedMessage.getBytes()));
+
         // 3. 验证校验码
         ChecksumUtils.ChecksumResult checksumResult = ChecksumUtils.verifyCompleteMessage(encodedMessage);
         assertTrue(checksumResult.isValid());
@@ -54,6 +57,8 @@ class JT808ComponentsExample {
         JT808Message parsedMessage = factory.parseMessage(encodedMessage);
         assertEquals(heartbeat.getMessageId(), parsedMessage.getMessageId());
         logger.info("4. 解析消息成功: {}", parsedMessage.getClass().getSimpleName());
+
+        logger.info(heartbeat.toString());
     }
 
     @Test

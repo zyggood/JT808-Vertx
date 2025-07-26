@@ -1,5 +1,6 @@
 package com.jt808.protocol.message;
 
+import com.jt808.common.util.ByteUtils;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
 import io.vertx.core.buffer.Buffer;
@@ -57,6 +58,9 @@ class JT808MessageTypesTest {
 
         JT808Header header = new JT808Header(0x0100, "13800138000", 1);
         register.setHeader(header);
+
+        System.out.println(ByteUtils.bytesToHex(encoder.encode(register).getBytes()));
+        System.out.println(register);
 
         // 编码
         Buffer encoded = register.encodeBody();
