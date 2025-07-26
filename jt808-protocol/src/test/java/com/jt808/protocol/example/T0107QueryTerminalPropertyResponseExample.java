@@ -1,5 +1,6 @@
 package com.jt808.protocol.example;
 
+import com.jt808.common.util.ByteUtils;
 import com.jt808.protocol.codec.JT808Decoder;
 import com.jt808.protocol.codec.JT808Encoder;
 import com.jt808.protocol.factory.JT808MessageFactory;
@@ -76,6 +77,7 @@ public class T0107QueryTerminalPropertyResponseExample {
             Buffer fullMessage = encoder.encode(message1);
             logger.info("完整消息长度: {} 字节", fullMessage.length());
             logger.info("完整消息(十六进制): {}", bytesToHex(fullMessage.getBytes()));
+            logger.info("完整消息(十六进制): {}", ByteUtils.bytesToHex(fullMessage.getBytes()));
 
             // 解码完整消息
             JT808Message decodedFullMessage = decoder.decode(fullMessage);

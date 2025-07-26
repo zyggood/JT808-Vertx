@@ -1,5 +1,9 @@
 package com.jt808.protocol.example;
 
+import com.jt808.common.util.ByteUtils;
+import com.jt808.protocol.factory.JT808MessageFactory;
+import com.jt808.protocol.message.JT808Header;
+import com.jt808.protocol.message.JT808Message;
 import com.jt808.protocol.message.T0108TerminalUpgradeResultNotification;
 import io.vertx.core.buffer.Buffer;
 import org.slf4j.Logger;
@@ -91,6 +95,14 @@ public class T0108TerminalUpgradeResultNotificationExample {
         Buffer encodedBuffer = originalMessage.encodeBody();
         logger.info("编码后的字节数据: {}", bytesToHexString(encodedBuffer.getBytes()));
         logger.info("编码后的数据长度: {} 字节", encodedBuffer.length());
+
+        // 为消息设置消息头
+        JT808Header header = new JT808Header(originalMessage.getMessageId(), "123456789012", 1);
+        originalMessage.setHeader(header);
+        Buffer buffer = JT808MessageFactory.getInstance().encodeMessage(originalMessage);
+
+        logger.info("编码后的字节数据: {}", ByteUtils.bytesToHex(buffer.getBytes()));
+        logger.info("消息内容: {}", originalMessage.toString());
 
         // 解码消息
         T0108TerminalUpgradeResultNotification decodedMessage = new T0108TerminalUpgradeResultNotification();

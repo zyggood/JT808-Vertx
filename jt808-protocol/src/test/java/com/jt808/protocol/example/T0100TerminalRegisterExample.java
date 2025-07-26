@@ -1,6 +1,7 @@
 package com.jt808.protocol.example;
 
 import com.jt808.common.exception.ProtocolException;
+import com.jt808.common.util.ByteUtils;
 import com.jt808.protocol.factory.JT808MessageFactory;
 import com.jt808.protocol.message.JT808Header;
 import com.jt808.protocol.message.JT808Message;
@@ -103,6 +104,7 @@ public class T0100TerminalRegisterExample {
             completeContent.append("...");
         }
         logger.info(completeContent.toString());
+        logger.info(ByteUtils.bytesToHex(completeMessage.getBytes()));
 
         // 8. 校验码验证
         ChecksumUtils.ChecksumResult checksumResult = ChecksumUtils.verifyCompleteMessage(completeMessage);
@@ -124,11 +126,11 @@ public class T0100TerminalRegisterExample {
         logger.info("    解析的消息类型: {}", parsed.getClass().getSimpleName());
         logger.info("    消息ID匹配: {}", (parsed.getMessageId() == 0x0100));
 
-        if (parsed instanceof T0100TerminalRegister) {
-            T0100TerminalRegister parsedRegister = (T0100TerminalRegister) parsed;
+        if (parsed instanceof T0100TerminalRegister parsedRegister) {
             logger.info("    解析的制造商ID: {}", parsedRegister.getManufacturerId());
             logger.info("    解析的终端型号: {}", parsedRegister.getTerminalModel());
             logger.info("    解析的车牌号: {}", parsedRegister.getPlateNumber());
+            logger.info("    ToString: {}", parsed);
         }
 
         // 11. 实际应用场景
