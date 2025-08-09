@@ -117,7 +117,8 @@ public class JT808Server extends AbstractVerticle {
                 .setTcpKeepAlive(true)
                 .setTcpNoDelay(true)
                 .setReuseAddress(true)
-                .setAcceptBacklog(1024);
+                .setReusePort(true)  // 启用端口复用提高并发性能
+                .setAcceptBacklog(65536);  // 增加连接队列大小支持大量并发连接
         
         tcpServer = vertx.createNetServer(options);
         
