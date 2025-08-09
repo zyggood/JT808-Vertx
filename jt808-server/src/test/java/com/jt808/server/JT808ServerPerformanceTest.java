@@ -37,7 +37,7 @@ class JT808ServerPerformanceTest {
 
     private static final Logger logger = LoggerFactory.getLogger(JT808ServerPerformanceTest.class);
     
-    private static final int TEST_PORT = 17611;
+    private static final int TEST_PORT = 7611;
     private static final String TEST_HOST = "localhost";
     
     private JT808Server server;
